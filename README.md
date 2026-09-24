@@ -70,7 +70,7 @@ A web application for detailed sports workout analysis with personalized health 
 ### Online Version
 Simply open the app in your browser - no installation required!
 
-**Live Demo**: [health-tracker](https://yourusername.github.io/health-tracker) *(replace with your actual URL)*
+**Live Demo**: [health-tracker](https://health-tracker-pied-phi.vercel.app)
 
 ### Local Usage
 1. Download `index.html`
@@ -159,7 +159,7 @@ If you have questions or issues:
 
 **Made with ❤️ for sports enthusiasts and healthy lifestyle advocates**
 
-[⭐ Star on GitHub](https://github.com/yourusername/health-tracker) | [🐛 Report Bug](https://github.com/yourusername/health-tracker/issues) | [💡 Request Feature](https://github.com/yourusername/health-tracker/issues)
+[⭐ Star on GitHub](https://github.com/unhombretln/health-tracker) | [🐛 Report Bug](https://github.com/unhombretln/health-tracker/issues) | [💡 Request Feature](https://github.com/unhombretln/health-tracker/issues)
 
 ---
 
@@ -227,7 +227,7 @@ If you have questions or issues:
 ### Онлайн версия
 Просто откройте приложение в браузере - никакой установки не требуется!
 
-**Демо**: [health-tracker](https://yourusername.github.io/health-tracker) *(замените на ваш URL)*
+**Демо**: [health-tracker](https://health-tracker-pied-phi.vercel.app)
 
 ### Локальное использование
 1. Скачайте `index.html`
@@ -339,4 +339,4 @@ MIT License - используйте свободно для личных и к�
 
 **Сделано с ❤️ для любителей спорта и здорового образа жизни**
 
-[⭐ Star на GitHub](https://github.com/yourusername/health-tracker) | [🐛 Сообщить о баге](https://github.com/yourusername/health-tracker/issues) | [💡 Предложить улучшение](https://github.com/yourusername/health-tracker/issues)
+[⭐ Star на GitHub](https://github.com/unhombretln/health-tracker) | [🐛 Сообщить о баге](https://github.com/unhombretln/health-tracker/issues) | [💡 Предложить улучшение](https://github.com/unhombretln/health-tracker/issues)

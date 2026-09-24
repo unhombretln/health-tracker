@@ -1078,6 +1078,11 @@
         uploadZone.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadZone.style.borderColor = 'var(--border-color)';
+            // Some apps (e.g. Telegram Desktop with several files) drop links instead of files
+            if (e.dataTransfer.files.length === 0) {
+                showNotification('Файлы не получены. Если перетаскиваете из Telegram, сначала сохраните их в папку', 'info');
+                return;
+            }
             handleFiles(e.dataTransfer.files);
         });
 

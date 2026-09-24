@@ -1048,7 +1048,7 @@
         loadProfile();
 
         // Notification system
-        function showNotification(message, type = 'info') {
+        function showNotification(message, type = 'info', duration = 3000) {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
@@ -1057,7 +1057,7 @@
             setTimeout(() => {
                 notification.style.animation = 'slideInRight 0.3s ease-out reverse';
                 setTimeout(() => notification.remove(), 300);
-            }, 3000);
+            }, duration);
         }
 
         // Upload handling
@@ -1080,7 +1080,7 @@
             uploadZone.style.borderColor = 'var(--border-color)';
             // Some apps (e.g. Telegram Desktop with several files) drop links instead of files
             if (e.dataTransfer.files.length === 0) {
-                showNotification('Файлы не получены. Если перетаскиваете из Telegram, сначала сохраните их в папку', 'info');
+                showNotification('Файлы не получены. Если перетаскиваете из Telegram, сначала сохраните их в папку', 'info', 5000);
                 return;
             }
             handleFiles(e.dataTransfer.files);

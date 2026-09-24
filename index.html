@@ -1400,7 +1400,11 @@
                 return null;
             }
 
-            const sport = activity.getAttribute('Sport') || 'Тренировка';
+            // TCX allows only Running/Biking/Other, so Zepp writes Sport="Other"
+            // and puts the real activity name ("Бадминтон", ...) into <Notes>
+            const sportAttr = activity.getAttribute('Sport');
+            const notes = activity.querySelector('Notes')?.textContent.trim();
+            const sport = (!sportAttr || sportAttr === 'Other') && notes ? notes : (sportAttr || 'Тренировка');
             console.log('TCX Sport attribute:', activity.getAttribute('Sport'), '-> sport:', sport);
             // Workout date: Activity Id -> first Lap StartTime -> first Trackpoint Time.
             // Falling back to "now" makes several files uploaded together look like duplicates.
@@ -1719,12 +1723,22 @@
                     'Soccer': '⚽'
                 };
                 
-                const sportIcon = sportIcons[workout.sport] || '💪';
-                const sportName = workout.sport || 'Тренировка';
+                // Russian names from Zepp <Notes>, first match wins
+                const sportKeywordIcons = [
+                    ['бадминтон', '🏸'], ['теннис', '🎾'], ['интервал', '⚡'], ['силов', '💪'],
+                    ['бег', '🏃'], ['ходьб', '🚶'], ['велосипед', '🚴'], ['плаван', '🏊'],
+                    ['йога', '🧘'], ['лыж', '⛷️'], ['футбол', '⚽'], ['баскетбол', '🏀']
+                ];
+                const sportLower = (workout.sport || '').toLowerCase();
+                const keywordIcon = sportKeywordIcons.find(([keyword]) => sportLower.includes(keyword))?.[1];
+                const sportIcon = sportIcons[workout.sport] || keywordIcon || '💪';
+                const sportName = (workout.sport || 'Тренировка')
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
                 item.innerHTML = `
                     <div class="workout-date">
                         <span title="${sportName}">${sportIcon}</span> ${dateStr}
+                        <span style="color: var(--text-dim); font-weight: normal;">· ${sportName}</span>
                     </div>
                     <div class="workout-stats">
                         <span class="stat-badge">⏱️ ${duration} мин</span>

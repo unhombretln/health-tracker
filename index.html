@@ -267,6 +267,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1rem;
             padding: 1rem;
             border-bottom: 1px solid var(--border-color);
             transition: all 0.2s ease;
@@ -288,7 +289,9 @@
 
         .workout-stats {
             display: flex;
-            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.5rem 0.75rem;
             color: var(--text-secondary);
             font-size: 0.9rem;
         }
@@ -302,6 +305,7 @@
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .empty-state {
@@ -827,8 +831,14 @@
                 grid-template-columns: 1fr;
             }
             
-            .workout-stats {
+            .workout-item {
                 flex-direction: column;
+                align-items: flex-start;
+                gap: 0.6rem;
+            }
+
+            .workout-stats {
+                justify-content: flex-start;
                 gap: 0.5rem;
             }
         }
@@ -842,14 +852,14 @@
 
         <header>
             <h1>ТРЕКЕР ЗДОРОВЬЯ</h1>
-            <div class="subtitle">Анализ тренировок на основе TCX и GPX данных</div>
+            <div class="subtitle">Анализ тренировок на основе TCX, GPX и FIT данных</div>
         </header>
 
         <div class="upload-zone" id="uploadZone">
             <div class="upload-icon">📊</div>
             <div class="upload-text">Загрузите файлы тренировок</div>
-            <div class="upload-hint">Поддерживаются форматы: TCX, GPX (универсальная совместимость)</div>
-            <input type="file" id="fileInput" multiple accept=".tcx,.gpx">
+            <div class="upload-hint">Поддерживаются форматы: TCX, GPX, FIT (универсальная совместимость)</div>
+            <input type="file" id="fileInput" multiple accept=".tcx,.gpx,.fit">
         </div>
 
         <div style="text-align: center; margin-bottom: 2rem;">
@@ -1261,9 +1271,15 @@
 
             for (let file of files) {
                 try {
-                    // Both TCX and GPX are XML text files
-                    const text = await file.text();
-                    const workout = parseWorkoutFile(text, file.name);
+                    let workout;
+                    if (file.name.toLowerCase().endsWith('.fit')) {
+                        // FIT is binary
+                        workout = await parseFIT(await file.arrayBuffer());
+                    } else {
+                        // TCX and GPX are XML text files
+                        const text = await file.text();
+                        workout = parseWorkoutFile(text, file.name);
+                    }
                     if (workout) {
                         newWorkouts.push(workout);
                         console.log('Parsed workout:', file.name, workout);
@@ -1309,6 +1325,10 @@
                         
                         if (sameDate && sameDuration && sameCalories) {
                             isDuplicate = true;
+                            // Keep the FIT copy of a workout: it carries more metrics than TCX/GPX
+                            if (workout.source === 'fit' && existing.source !== 'fit') {
+                                uniqueWorkouts[i] = workout;
+                            }
                             console.log('Duplicate found:', workout.date, 'matches existing workout');
                             break;
                         }
@@ -1488,6 +1508,143 @@
                 maxHeartRate,
                 heartRates,
                 trackPoints
+            };
+        }
+
+        // FIT is a binary format: decoded with Garmin's official FIT SDK,
+        // which is loaded only when a .fit file is uploaded
+        const FIT_SDK_URL = 'https://cdn.jsdelivr.net/npm/@garmin/fitsdk@21.217.0/src/index.js';
+        let fitSdkPromise = null;
+
+        function loadFitSdk() {
+            if (!fitSdkPromise) {
+                fitSdkPromise = import(FIT_SDK_URL).catch(error => {
+                    fitSdkPromise = null; // allow a retry after a network error
+                    throw error;
+                });
+            }
+            return fitSdkPromise;
+        }
+
+        // Russian names for FIT sport / sub-sport values (a known sub-sport wins)
+        const FIT_SUB_SPORT_NAMES = {
+            badminton: 'Бадминтон', tableTennis: 'Настольный теннис', squash: 'Сквош', padel: 'Падел',
+            pickleball: 'Пиклбол', racquetball: 'Ракетбол',
+            treadmill: 'Бег на дорожке', indoorRunning: 'Бег в помещении', trail: 'Трейлраннинг',
+            indoorCycling: 'Велотренажёр', spin: 'Сайкл', mountain: 'Маунтинбайк',
+            lapSwimming: 'Плавание в бассейне', openWater: 'Плавание на открытой воде',
+            strengthTraining: 'Силовая тренировка', cardioTraining: 'Кардиотренировка',
+            flexibilityTraining: 'Растяжка', yoga: 'Йога', pilates: 'Пилатес',
+            hiit: 'Интервальная тренировка (HIIT)', tabata: 'Интервальная тренировка (табата)',
+            amrap: 'Интервальная тренировка (AMRAP)', emom: 'Интервальная тренировка (EMOM)',
+            elliptical: 'Эллипс', indoorRowing: 'Гребной тренажёр', stairClimbing: 'Степпер',
+            indoorWalking: 'Ходьба в помещении', casualWalking: 'Прогулка', speedWalking: 'Спортивная ходьба'
+        };
+        const FIT_SPORT_NAMES = {
+            generic: 'Тренировка', running: 'Бег', cycling: 'Велосипед', walking: 'Ходьба',
+            hiking: 'Хайкинг', swimming: 'Плавание', training: 'Тренировка', fitnessEquipment: 'Тренажёр',
+            hiit: 'Интервальная тренировка (HIIT)', racket: 'Ракеточный спорт', tennis: 'Теннис',
+            basketball: 'Баскетбол', soccer: 'Футбол', volleyball: 'Волейбол', rowing: 'Гребля',
+            crossCountrySkiing: 'Беговые лыжи', alpineSkiing: 'Горные лыжи', snowboarding: 'Сноуборд',
+            inlineSkating: 'Ролики', iceSkating: 'Коньки', rockClimbing: 'Скалолазание', boxing: 'Бокс',
+            dance: 'Танцы', jumpRope: 'Скакалка', meditation: 'Медитация', mobility: 'Мобильность'
+        };
+
+        async function parseFIT(arrayBuffer) {
+            let sdk;
+            try {
+                sdk = await loadFitSdk();
+            } catch (error) {
+                console.error('Failed to load FIT SDK:', error);
+                const message = 'Не удалось загрузить модуль для FIT-файлов. Проверьте подключение к интернету';
+                // Several FIT files in one upload should not stack identical notifications
+                if (![...document.querySelectorAll('.notification')].some(n => n.textContent === message)) {
+                    showNotification(message, 'info', 5000);
+                }
+                return null;
+            }
+            const { Decoder, Stream } = sdk;
+
+            const checker = new Decoder(Stream.fromArrayBuffer(arrayBuffer));
+            if (!checker.isFIT() || !checker.checkIntegrity()) {
+                console.error('Not a valid FIT file or the file is damaged');
+                return null;
+            }
+
+            const { messages, errors } = new Decoder(Stream.fromArrayBuffer(arrayBuffer))
+                .read({ convertTypesToStrings: true });
+            if (errors.length > 0) {
+                console.warn('FIT decode errors:', errors);
+            }
+
+            const sessions = messages.sessionMesgs || [];
+            const session = sessions[0];
+            if (!session) {
+                console.warn('No session message in FIT file');
+                return null;
+            }
+
+            const records = messages.recordMesgs || [];
+            const heartRates = records.map(r => r.heartRate).filter(hr => hr > 0);
+            const trackPoints = records.map(r => ({
+                time: r.timestamp || null,
+                heartRate: r.heartRate || 0,
+                speed: (r.enhancedSpeed ?? r.speed ?? 0) * 3.6 // m/s to km/h
+            }));
+
+            let date = session.startTime || records[0]?.timestamp;
+            if (!date) {
+                date = new Date();
+                console.warn('No date in FIT file, using current date');
+            }
+
+            // Multisport files have several sessions; totals cover all of them
+            const sum = (field) => sessions.reduce((total, s) => total + (s[field] || 0), 0);
+            const duration = sum('totalTimerTime') || sum('totalElapsedTime');
+            const calories = sum('totalCalories');
+
+            if (duration === 0 && calories === 0) {
+                console.warn('FIT file has no usable data');
+                return null;
+            }
+
+            const avgHeartRate = session.avgHeartRate || (heartRates.length > 0
+                ? Math.round(heartRates.reduce((a, b) => a + b, 0) / heartRates.length)
+                : 0);
+            const maxHeartRate = session.maxHeartRate || heartRates.reduce((a, b) => Math.max(a, b), 0);
+            const minHeartRate = session.minHeartRate || (heartRates.length > 0
+                ? heartRates.reduce((a, b) => Math.min(a, b))
+                : null);
+
+            const sport = FIT_SUB_SPORT_NAMES[session.subSport]
+                || FIT_SPORT_NAMES[session.sport]
+                || session.sport
+                || 'Тренировка';
+
+            console.log('Successfully parsed FIT:', {
+                date: date.toISOString(),
+                sport: `${session.sport}/${session.subSport} -> ${sport}`,
+                duration,
+                calories
+            });
+
+            return {
+                date,
+                sport,
+                duration,
+                distance: sum('totalDistance'),
+                calories,
+                avgHeartRate,
+                maxHeartRate,
+                heartRates,
+                trackPoints,
+                source: 'fit',
+                // Extra metrics only FIT carries (null when the device does not write them)
+                minHeartRate,
+                trainingEffect: session.totalTrainingEffect ?? null,
+                anaerobicTrainingEffect: session.totalAnaerobicTrainingEffect ?? null,
+                trainingLoad: session.trainingLoadPeak ?? null,
+                timeInHrZone: session.timeInHrZone ?? null
             };
         }
 
@@ -1726,8 +1883,9 @@
                 // Russian names from Zepp <Notes>, first match wins
                 const sportKeywordIcons = [
                     ['бадминтон', '🏸'], ['теннис', '🎾'], ['интервал', '⚡'], ['силов', '💪'],
-                    ['бег', '🏃'], ['ходьб', '🚶'], ['велосипед', '🚴'], ['плаван', '🏊'],
-                    ['йога', '🧘'], ['лыж', '⛷️'], ['футбол', '⚽'], ['баскетбол', '🏀']
+                    ['бег', '🏃'], ['ходьб', '🚶'], ['вело', '🚴'], ['плаван', '🏊'],
+                    ['йога', '🧘'], ['лыж', '⛷️'], ['футбол', '⚽'], ['баскетбол', '🏀'],
+                    ['ракеточ', '🏸'], ['прогулк', '🚶']
                 ];
                 const sportLower = (workout.sport || '').toLowerCase();
                 const keywordIcon = sportKeywordIcons.find(([keyword]) => sportLower.includes(keyword))?.[1];
@@ -1744,6 +1902,9 @@
                         <span class="stat-badge">⏱️ ${duration} мин</span>
                         <span class="stat-badge">🔥 ${Math.round(workout.calories)} ккал</span>
                         <span class="stat-badge">💓 ${workout.avgHeartRate} уд/мин</span>
+                        ${workout.minHeartRate ? `<span class="stat-badge" title="Минимальный пульс">📉 мин. ${workout.minHeartRate} уд/мин</span>` : ''}
+                        ${workout.trainingEffect != null ? `<span class="stat-badge" title="Тренировочный эффект по данным часов (0–5): аэробный / анаэробный">🎯 эффект ${workout.trainingEffect.toFixed(1)}${workout.anaerobicTrainingEffect != null ? ` / ${workout.anaerobicTrainingEffect.toFixed(1)}` : ''}</span>` : ''}
+                        ${workout.trainingLoad != null ? `<span class="stat-badge" title="Тренировочная нагрузка по данным часов">📊 нагрузка ${workout.trainingLoad}</span>` : ''}
                         ${workout.distance > 0 ? `<span class="stat-badge">📍 ${distance} км</span>` : ''}
                     </div>
                 `;
@@ -1792,11 +1953,18 @@
                                 },
                                 label: (item) => {
                                     const w = chartWorkouts[item.dataIndex];
-                                    return [
+                                    const lines = [
                                         `⏱️ ${item.raw} мин`,
                                         `🔥 ${Math.round(w.calories)} ккал`,
-                                        `💓 ${w.avgHeartRate} уд/мин`
+                                        `💓 ${w.avgHeartRate} уд/мин` + (w.minHeartRate ? ` (мин. ${w.minHeartRate}, макс. ${w.maxHeartRate})` : '')
                                     ];
+                                    if (w.trainingEffect != null) {
+                                        lines.push(`🎯 эффект ${w.trainingEffect.toFixed(1)}` + (w.anaerobicTrainingEffect != null ? ` / ${w.anaerobicTrainingEffect.toFixed(1)}` : ''));
+                                    }
+                                    if (w.trainingLoad != null) {
+                                        lines.push(`📊 нагрузка ${w.trainingLoad}`);
+                                    }
+                                    return lines;
                                 }
                             }
                         }

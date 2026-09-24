@@ -1400,7 +1400,11 @@
                 return null;
             }
 
-            const sport = activity.getAttribute('Sport') || 'Тренировка';
+            // TCX allows only Running/Biking/Other, so Zepp writes Sport="Other"
+            // and puts the real activity name ("Бадминтон", ...) into <Notes>
+            const sportAttr = activity.getAttribute('Sport');
+            const notes = activity.querySelector('Notes')?.textContent.trim();
+            const sport = (!sportAttr || sportAttr === 'Other') && notes ? notes : (sportAttr || 'Тренировка');
             console.log('TCX Sport attribute:', activity.getAttribute('Sport'), '-> sport:', sport);
             // Workout date: Activity Id -> first Lap StartTime -> first Trackpoint Time.
             // Falling back to "now" makes several files uploaded together look like duplicates.
@@ -1719,12 +1723,22 @@
                     'Soccer': '⚽'
                 };
                 
-                const sportIcon = sportIcons[workout.sport] || '💪';
-                const sportName = workout.sport || 'Тренировка';
+                // Russian names from Zepp <Notes>, first match wins
+                const sportKeywordIcons = [
+                    ['бадминтон', '🏸'], ['теннис', '🎾'], ['интервал', '⚡'], ['силов', '💪'],
+                    ['бег', '🏃'], ['ходьб', '🚶'], ['велосипед', '🚴'], ['плаван', '🏊'],
+                    ['йога', '🧘'], ['лыж', '⛷️'], ['футбол', '⚽'], ['баскетбол', '🏀']
+                ];
+                const sportLower = (workout.sport || '').toLowerCase();
+                const keywordIcon = sportKeywordIcons.find(([keyword]) => sportLower.includes(keyword))?.[1];
+                const sportIcon = sportIcons[workout.sport] || keywordIcon || '💪';
+                const sportName = (workout.sport || 'Тренировка')
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
                 item.innerHTML = `
                     <div class="workout-date">
                         <span title="${sportName}">${sportIcon}</span> ${dateStr}
+                        <span style="color: var(--text-dim); font-weight: normal;">· ${sportName}</span>
                     </div>
                     <div class="workout-stats">
                         <span class="stat-badge">⏱️ ${duration} мин</span>
@@ -1743,15 +1757,10 @@
             Object.values(charts).forEach(chart => chart.destroy());
             charts = {};
 
-            // Workouts over time chart
-            const workoutsByDate = {};
-            workoutsData.forEach(workout => {
-                const dateKey = workout.date.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' });
-                workoutsByDate[dateKey] = (workoutsByDate[dateKey] || 0) + 1;
-            });
-
-            const labels = Object.keys(workoutsByDate).slice(-14);
-            const data = labels.map(label => workoutsByDate[label]);
+            // Workouts over time chart: one bar per workout (duration), oldest -> newest, last 30
+            const chartWorkouts = [...workoutsData].sort((a, b) => a.date - b.date).slice(-30);
+            const labels = chartWorkouts.map(w => w.date.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' }));
+            const data = chartWorkouts.map(w => Math.round(w.duration / 60));
 
             const ctx1 = document.getElementById('workoutsChart').getContext('2d');
             charts.workouts = new Chart(ctx1, {
@@ -1759,27 +1768,44 @@
                 data: {
                     labels,
                     datasets: [{
-                        label: 'Количество тренировок',
+                        label: 'Длительность',
                         data,
                         backgroundColor: 'rgba(0, 255, 136, 0.6)',
                         borderColor: 'rgba(0, 255, 136, 1)',
                         borderWidth: 2,
-                        borderRadius: 8
+                        borderRadius: 8,
+                        maxBarThickness: 48
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
                     plugins: {
-                        legend: { display: false }
+                        legend: { display: false },
+                        tooltip: {
+                            displayColors: false,
+                            callbacks: {
+                                title: (items) => {
+                                    const w = chartWorkouts[items[0].dataIndex];
+                                    const date = w.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+                                    return `${date} · ${w.sport || 'Тренировка'}`;
+                                },
+                                label: (item) => {
+                                    const w = chartWorkouts[item.dataIndex];
+                                    return [
+                                        `⏱️ ${item.raw} мин`,
+                                        `🔥 ${Math.round(w.calories)} ккал`,
+                                        `💓 ${w.avgHeartRate} уд/мин`
+                                    ];
+                                }
+                            }
+                        }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { 
-                                color: '#8b9dc3',
-                                stepSize: 1
-                            },
+                            title: { display: true, text: 'мин', color: '#8b9dc3' },
+                            ticks: { color: '#8b9dc3' },
                             grid: { color: '#2a3550' }
                         },
                         x: {

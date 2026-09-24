@@ -1,6 +1,6 @@
 # 💪 Health Tracker
 
-**Workout Analysis Based on TCX and GPX Data**
+**Workout Analysis Based on TCX, GPX and FIT Data**
 
 A web application for detailed sports workout analysis with personalized health recommendations.
 
@@ -65,6 +65,11 @@ A web application for detailed sports workout analysis with personalized health 
 - ✅ Garmin
 - ✅ All GPS-enabled devices
 
+### FIT Format
+- ✅ Amazfit + Zepp (sport type, training effect and training load included)
+- ✅ Garmin
+- ✅ Apple Watch (via HealthFit/RunGap)
+
 ## 🚀 How to Use
 
 ### Online Version
@@ -79,7 +84,7 @@ Simply open the app in your browser - no installation required!
 
 ### Loading Data
 1. Export workouts from your app (Zepp, Garmin Connect, Strava, etc.)
-2. Drag and drop TCX or GPX files into the upload zone
+2. Drag and drop TCX, GPX or FIT files into the upload zone
 3. The app automatically processes data and shows detailed analytics
 
 ## 🔒 Privacy
@@ -110,20 +115,21 @@ Simply open the app in your browser - no installation required!
 ### Format Parsing
 - **TCX**: Full support for all metrics (heart rate, calories, duration, laps)
 - **GPX**: Heart rate extraction from extensions, GPS-based distance calculation
-- **Auto-deduplication**: removes duplicate workouts
+- **FIT**: Decoded with Garmin's official FIT SDK (loaded from CDN on the first FIT upload, so that needs internet): sport and sub-sport, heart rate, calories, min heart rate, training effect, training load
+- **Auto-deduplication**: removes duplicate workouts; when the same workout is uploaded as TCX and FIT, the FIT copy is kept
 
 ## 📈 Usage Examples
 
 ### Export from Zepp (Amazfit)
 1. Open workout in Zepp app
 2. Tap ⋮ (three dots)
-3. Select "Export" → TCX or GPX
+3. Select "Export" → FIT (recommended), TCX or GPX
 4. Upload file to tracker
 
 ### Export from Apple Watch
 1. Install HealthFit or RunGap
 2. Select workout
-3. Export as GPX or TCX
+3. Export as FIT, GPX or TCX
 4. Upload to tracker
 
 ### Export from Strava
@@ -165,7 +171,7 @@ If you have questions or issues:
 
 # 💪 Трекер Здоровья (Russian Version)
 
-**Анализ тренировок на основе TCX и GPX данных**
+**Анализ тренировок на основе TCX, GPX и FIT данных**
 
 Веб-приложение для детального анализа спортивных тренировок с персонализированными рекомендациями по здоровью.
 
@@ -222,6 +228,11 @@ If you have questions or issues:
 - ✅ Garmin
 - ✅ Все устройства с GPS
 
+### FIT формат
+- ✅ Amazfit + Zepp (с видом спорта, тренировочным эффектом и нагрузкой)
+- ✅ Garmin
+- ✅ Apple Watch (через HealthFit/RunGap)
+
 ## 🚀 Как использовать
 
 ### Онлайн версия
@@ -236,7 +247,7 @@ If you have questions or issues:
 
 ### Загрузка данных
 1. Экспортируйте тренировки из вашего приложения (Zepp, Garmin Connect, Strava и т.д.)
-2. Перетащите файлы TCX или GPX в зону загрузки
+2. Перетащите файлы TCX, GPX или FIT в зону загрузки
 3. Приложение автоматически обработает данные и покажет детальную аналитику
 
 ## 🔒 Приватность
@@ -267,20 +278,21 @@ If you have questions or issues:
 ### Парсинг форматов
 - **TCX**: Полная поддержка всех метрик (пульс, калории, длительность, laps)
 - **GPX**: Извлечение пульса из extensions, расчёт дистанции по GPS
-- **Автоматическая дедупликация**: удаление повторяющихся тренировок
+- **FIT**: Разбор официальной библиотекой Garmin FIT SDK (загружается с CDN при первой загрузке FIT-файла, для этого нужен интернет): вид спорта и подвид, пульс, калории, минимальный пульс, тренировочный эффект, тренировочная нагрузка
+- **Автоматическая дедупликация**: удаление повторяющихся тренировок; если одна тренировка загружена и в TCX, и в FIT, остаётся FIT
 
 ## 📈 Примеры использования
 
 ### Экспорт из Zepp (Amazfit)
 1. Откройте тренировку в приложении Zepp
 2. Нажмите ⋮ (три точки)
-3. Выберите "Экспорт" → TCX или GPX
+3. Выберите "Экспорт" → FIT (рекомендуется), TCX или GPX
 4. Загрузите файл в трекер
 
 ### Экспорт из Apple Watch
 1. Установите HealthFit или RunGap
 2. Выберите тренировку
-3. Экспортируйте в GPX или TCX
+3. Экспортируйте в FIT, GPX или TCX
 4. Загрузите в трекер
 
 ### Экспорт из Strava

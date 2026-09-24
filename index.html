@@ -1048,7 +1048,7 @@
         loadProfile();
 
         // Notification system
-        function showNotification(message, type = 'info') {
+        function showNotification(message, type = 'info', duration = 3000) {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
@@ -1057,7 +1057,7 @@
             setTimeout(() => {
                 notification.style.animation = 'slideInRight 0.3s ease-out reverse';
                 setTimeout(() => notification.remove(), 300);
-            }, 3000);
+            }, duration);
         }
 
         // Upload handling
@@ -1078,6 +1078,11 @@
         uploadZone.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadZone.style.borderColor = 'var(--border-color)';
+            // Some apps (e.g. Telegram Desktop with several files) drop links instead of files
+            if (e.dataTransfer.files.length === 0) {
+                showNotification('Файлы не получены. Если перетаскиваете из Telegram, сначала сохраните их в папку', 'info', 5000);
+                return;
+            }
             handleFiles(e.dataTransfer.files);
         });
 
@@ -1397,8 +1402,19 @@
 
             const sport = activity.getAttribute('Sport') || 'Тренировка';
             console.log('TCX Sport attribute:', activity.getAttribute('Sport'), '-> sport:', sport);
-            const id = xml.querySelector('Id')?.textContent;
-            const date = id ? new Date(id) : new Date();
+            // Workout date: Activity Id -> first Lap StartTime -> first Trackpoint Time.
+            // Falling back to "now" makes several files uploaded together look like duplicates.
+            const toDate = (value) => {
+                const d = value ? new Date(value.trim()) : null;
+                return d && !isNaN(d.getTime()) ? d : null;
+            };
+            let date = toDate(activity.querySelector('Id')?.textContent)
+                || toDate(activity.querySelector('Lap')?.getAttribute('StartTime'))
+                || toDate(activity.querySelector('Trackpoint Time')?.textContent);
+            if (!date) {
+                date = new Date();
+                console.warn('No date in TCX file, using current date');
+            }
 
             let totalTime = 0;
             let totalDistance = 0;

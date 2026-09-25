@@ -364,10 +364,19 @@
             to { transform: rotate(360deg); }
         }
 
-        .notification {
+        .notification-stack {
             position: fixed;
             top: 2rem;
             right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.75rem;
+            max-width: min(420px, calc(100vw - 2rem));
+        }
+
+        .notification {
             background: var(--bg-card);
             border: 2px solid var(--accent-primary);
             border-radius: 12px;
@@ -375,7 +384,6 @@
             color: var(--text-primary);
             font-weight: 600;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
             animation: slideInRight 0.3s ease-out;
         }
 
@@ -861,6 +869,13 @@
             h1 {
                 font-size: 2.5rem;
                 overflow-wrap: break-word;
+            }
+
+            .notification-stack {
+                top: 1rem;
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
             }
 
             .top-bar {
@@ -1541,18 +1556,42 @@
             'other': 'generic', 'biking': 'cycling', 'outdoor running': 'running',
             'outdoor cycling': 'cycling', 'pool swimming': 'lapSwimming',
             'open water swimming': 'openWater', 'roller skating': 'inlineSkating',
-            'skiing': 'alpineSkiing', 'football': 'soccer'
+            'skiing': 'alpineSkiing', 'football': 'soccer',
+            // Zepp activity names (TCX <Notes>, GPX track name)
+            'интервальная тренировка': 'hiit', 'interval training': 'hiit', 'hiit': 'hiit',
+            'силовой тренинг': 'strengthTraining', 'strength training': 'strengthTraining'
         };
+
+        // Too general to identify a sport when found inside a longer name
+        const GENERIC_SPORT_KEYS = ['generic', 'training', 'racket', 'fitnessEquipment'];
 
         // Match a sport name from a file to a SPORTS key (any language, case-insensitive)
         function sportKeyFromName(name) {
             const needle = (name || '').trim().toLowerCase();
             if (!needle) return null;
-            if (SPORT_ALIASES[needle]) return SPORT_ALIASES[needle];
+
+            const known = Object.entries(SPORT_ALIASES).map(([alias, key]) => [alias, key]);
             for (const [key, sport] of Object.entries(SPORTS)) {
-                if (LANGUAGES.some(lang => sport[lang].toLowerCase() === needle)) return key;
+                LANGUAGES.forEach(lang => known.push([sport[lang].toLowerCase(), key]));
             }
-            return null;
+
+            const exact = known.find(([candidate]) => candidate === needle);
+            if (exact) return exact[1];
+
+            // Zepp writes "<category> <type>", e.g. "Силовой тренинг Интервальная тренировка":
+            // take the known name that ends last (the type), the longest one on a tie
+            let best = null;
+            for (const [candidate, key] of known) {
+                if (GENERIC_SPORT_KEYS.includes(key) || candidate.length < 4) continue;
+                const escaped = candidate.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const match = new RegExp(`(^|[^\\p{L}])${escaped}(?=$|[^\\p{L}])`, 'u').exec(needle);
+                if (!match) continue;
+                const end = match.index + match[0].length;
+                if (!best || end > best.end || (end === best.end && candidate.length > best.length)) {
+                    best = { key, end, length: candidate.length };
+                }
+            }
+            return best ? best.key : null;
         }
 
         // Fallback icons for names we cannot map (e.g. "Силовой тренинг Интервальная тренировка"), first match wins
@@ -1729,10 +1768,18 @@
 
         // Notification system
         function showNotification(message, type = 'info', duration = 3000) {
+            // Notifications stack in one column instead of covering each other
+            let stack = document.getElementById('notificationStack');
+            if (!stack) {
+                stack = document.createElement('div');
+                stack.id = 'notificationStack';
+                stack.className = 'notification-stack';
+                document.body.appendChild(stack);
+            }
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
-            document.body.appendChild(notification);
+            stack.appendChild(notification);
 
             setTimeout(() => {
                 notification.style.animation = 'slideInRight 0.3s ease-out reverse';

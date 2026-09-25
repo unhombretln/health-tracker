@@ -35,6 +35,10 @@ A web application for detailed sports workout analysis with personalized health 
 - Maximum heart rate calculation
 - Local data storage
 
+### 🌐 Languages
+- Russian, English and Estonian interface (RU / EN / ET switch in the top-right corner)
+- Language is picked from the browser settings on the first visit and remembered afterwards
+
 ## 🏃 Supported Sports
 
 - 🏃 Running (Outdoor, Indoor, Treadmill)
@@ -197,6 +201,10 @@ If you have questions or issues:
 - Автоматический расчёт ИМТ
 - Расчёт максимального пульса
 - Сохранение данных локально
+
+### 🌐 Языки
+- Интерфейс на русском, английском и эстонском (переключатель RU / EN / ET в правом верхнем углу)
+- При первом заходе язык берётся из настроек браузера, дальше запоминается выбранный
 
 ## 🏃 Поддерживаемые виды спорта
 

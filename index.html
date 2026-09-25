@@ -364,10 +364,19 @@
             to { transform: rotate(360deg); }
         }
 
-        .notification {
+        .notification-stack {
             position: fixed;
             top: 2rem;
             right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.75rem;
+            max-width: min(420px, calc(100vw - 2rem));
+        }
+
+        .notification {
             background: var(--bg-card);
             border: 2px solid var(--accent-primary);
             border-radius: 12px;
@@ -375,7 +384,6 @@
             color: var(--text-primary);
             font-weight: 600;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
             animation: slideInRight 0.3s ease-out;
         }
 
@@ -476,10 +484,46 @@
             transform: scale(1.05);
         }
 
-        .profile-btn {
+        .top-bar {
             position: fixed;
             top: 2rem;
             right: 2rem;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .lang-switch {
+            display: flex;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.8rem 0.7rem;
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .lang-btn:hover {
+            color: var(--accent-secondary);
+        }
+
+        .lang-btn.active {
+            background: var(--accent-secondary);
+            color: var(--bg-primary);
+        }
+
+        .profile-btn {
             background: var(--bg-card);
             border: 2px solid var(--accent-secondary);
             color: var(--accent-secondary);
@@ -490,7 +534,6 @@
             transition: all 0.3s ease;
             font-family: 'Manrope', sans-serif;
             font-size: 0.9rem;
-            z-index: 100;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -825,6 +868,20 @@
         @media (max-width: 768px) {
             h1 {
                 font-size: 2.5rem;
+                overflow-wrap: break-word;
+            }
+
+            .notification-stack {
+                top: 1rem;
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+
+            .top-bar {
+                position: static;
+                justify-content: flex-end;
+                margin-bottom: 1.5rem;
             }
             
             .dashboard {
@@ -846,86 +903,91 @@
 </head>
 <body>
     <div class="container">
-        <button class="profile-btn" id="profileBtn">
-            👤 Профиль
-        </button>
+        <div class="top-bar">
+            <div class="lang-switch" id="langSwitch" role="group" aria-label="Язык">
+                <button type="button" class="lang-btn" data-lang="ru">RU</button>
+                <button type="button" class="lang-btn" data-lang="en">EN</button>
+                <button type="button" class="lang-btn" data-lang="et">ET</button>
+            </div>
+            <button class="profile-btn" id="profileBtn" data-i18n="profile.button">👤 Профиль</button>
+        </div>
 
         <header>
-            <h1>ТРЕКЕР ЗДОРОВЬЯ</h1>
-            <div class="subtitle">Анализ тренировок на основе TCX, GPX и FIT данных</div>
+            <h1 data-i18n="header.title">ТРЕКЕР ЗДОРОВЬЯ</h1>
+            <div class="subtitle" data-i18n="header.subtitle">Анализ тренировок на основе TCX, GPX и FIT данных</div>
         </header>
 
         <div class="upload-zone" id="uploadZone">
             <div class="upload-icon">📊</div>
-            <div class="upload-text">Загрузите файлы тренировок</div>
-            <div class="upload-hint">Поддерживаются форматы: TCX, GPX, FIT (универсальная совместимость)</div>
+            <div class="upload-text" data-i18n="upload.title">Загрузите файлы тренировок</div>
+            <div class="upload-hint" data-i18n="upload.hint">Поддерживаются форматы: TCX, GPX, FIT (универсальная совместимость)</div>
             <input type="file" id="fileInput" multiple accept=".tcx,.gpx,.fit">
         </div>
 
         <div style="text-align: center; margin-bottom: 2rem;">
-            <button class="clear-btn" id="clearBtn" style="display: none;">🗑️ Очистить все данные</button>
+            <button class="clear-btn" id="clearBtn" style="display: none;" data-i18n="clear.button">🗑️ Очистить все данные</button>
         </div>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <div>Обработка данных...</div>
+            <div data-i18n="loading">Обработка данных...</div>
         </div>
 
         <div class="dashboard" id="dashboard">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Всего тренировок</div>
+                    <div class="card-title" data-i18n="card.workouts.title">Всего тренировок</div>
                     <div class="card-icon">🏸</div>
                 </div>
                 <div class="card-value" id="totalWorkouts">0</div>
-                <div class="card-subtitle">За всё время</div>
+                <div class="card-subtitle" data-i18n="card.workouts.sub">За всё время</div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Сожжено калорий</div>
+                    <div class="card-title" data-i18n="card.calories.title">Сожжено калорий</div>
                     <div class="card-icon">🔥</div>
                 </div>
                 <div class="card-value" id="totalCalories">0</div>
-                <div class="card-subtitle">Общий расход энергии</div>
+                <div class="card-subtitle" data-i18n="card.calories.sub">Общий расход энергии</div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Средний пульс</div>
+                    <div class="card-title" data-i18n="card.hr.title">Средний пульс</div>
                     <div class="card-icon">💓</div>
                 </div>
                 <div class="card-value" id="avgHeartRate">--</div>
-                <div class="card-subtitle">Ударов в минуту</div>
+                <div class="card-subtitle" data-i18n="card.hr.sub">Ударов в минуту</div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Общее время</div>
+                    <div class="card-title" data-i18n="card.time.title">Общее время</div>
                     <div class="card-icon">⏱️</div>
                 </div>
                 <div class="card-value" id="totalTime">0ч</div>
-                <div class="card-subtitle">Активных тренировок</div>
+                <div class="card-subtitle" data-i18n="card.time.sub">Активных тренировок</div>
             </div>
         </div>
 
         <div class="chart-container" id="chartsContainer" style="display: none;">
-            <div class="chart-title">📈 Динамика тренировок</div>
+            <div class="chart-title" data-i18n="chart.dynamics.title">📈 Динамика тренировок</div>
             <canvas id="workoutsChart"></canvas>
         </div>
 
         <div class="chart-container" id="heartRateContainer" style="display: none;">
-            <div class="chart-title">💗 Анализ пульса</div>
+            <div class="chart-title" data-i18n="chart.hr.title">💗 Анализ пульса</div>
             <canvas id="heartRateChart"></canvas>
         </div>
 
         <div class="health-insights" id="insights" style="display: none;">
-            <div class="chart-title">💡 Рекомендации по здоровью</div>
+            <div class="chart-title" data-i18n="insights.title">💡 Рекомендации по здоровью</div>
             <div id="insightsContent"></div>
         </div>
 
         <div class="hr-zones" id="hrZones" style="display: none;">
-            <div class="chart-title">❤️ Зоны пульса</div>
+            <div class="chart-title" data-i18n="zones.title">❤️ Зоны пульса</div>
             <div class="zone-bar" id="zoneBar"></div>
             <div class="zone-legend" id="zoneLegend"></div>
         </div>
@@ -934,16 +996,16 @@
 
         <div id="benchmarksSection" style="display: none;">
             <div class="chart-container">
-                <div class="chart-title">📊 Сравнение с лучшими показателями</div>
+                <div class="chart-title" data-i18n="benchmarks.title">📊 Сравнение с лучшими показателями</div>
                 <div id="benchmarksContent"></div>
             </div>
         </div>
 
         <div class="workouts-list" id="workoutsList">
-            <div class="chart-title">📋 История тренировок</div>
+            <div class="chart-title" data-i18n="history.title">📋 История тренировок</div>
             <div class="empty-state">
                 <div class="empty-icon">📁</div>
-                <div>Загрузите файлы тренировок для начала анализа</div>
+                <div data-i18n="history.empty">Загрузите файлы тренировок для начала анализа</div>
             </div>
         </div>
     </div>
@@ -951,11 +1013,11 @@
     <!-- Confirm Modal -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-content">
-            <div class="modal-title">⚠️ Подтверждение</div>
-            <div class="modal-text">Вы уверены, что хотите очистить все данные? Это действие нельзя отменить.</div>
+            <div class="modal-title" data-i18n="confirm.title">⚠️ Подтверждение</div>
+            <div class="modal-text" data-i18n="confirm.text">Вы уверены, что хотите очистить все данные? Это действие нельзя отменить.</div>
             <div class="modal-buttons">
-                <button class="modal-btn modal-btn-cancel" id="modalCancel">Отмена</button>
-                <button class="modal-btn modal-btn-confirm" id="modalConfirm">Очистить</button>
+                <button class="modal-btn modal-btn-cancel" id="modalCancel" data-i18n="common.cancel">Отмена</button>
+                <button class="modal-btn modal-btn-confirm" id="modalConfirm" data-i18n="confirm.clear">Очистить</button>
             </div>
         </div>
     </div>
@@ -963,48 +1025,689 @@
     <!-- Profile Modal -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-content">
-            <div class="modal-title">👤 Мой профиль</div>
+            <div class="modal-title" data-i18n="profile.title">👤 Мой профиль</div>
             <form class="profile-form" id="profileForm">
                 <div class="form-group">
-                    <label class="form-label" for="age">Возраст (лет)</label>
-                    <input type="number" class="form-input" id="age" min="10" max="100" placeholder="Например: 25">
+                    <label class="form-label" for="age" data-i18n="profile.age">Возраст (лет)</label>
+                    <input type="number" class="form-input" id="age" min="10" max="100" placeholder="Например: 25" data-i18n-placeholder="profile.agePlaceholder">
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="gender">Пол</label>
+                    <label class="form-label" for="gender" data-i18n="profile.gender">Пол</label>
                     <select class="form-select" id="gender">
-                        <option value="">Не указан</option>
-                        <option value="male">Мужской</option>
-                        <option value="female">Женский</option>
+                        <option value="" data-i18n="profile.genderNone">Не указан</option>
+                        <option value="male" data-i18n="profile.genderMale">Мужской</option>
+                        <option value="female" data-i18n="profile.genderFemale">Женский</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="weight">Вес (кг)</label>
-                    <input type="number" class="form-input" id="weight" min="30" max="200" step="0.1" placeholder="Например: 70">
+                    <label class="form-label" for="weight" data-i18n="profile.weight">Вес (кг)</label>
+                    <input type="number" class="form-input" id="weight" min="30" max="200" step="0.1" placeholder="Например: 70" data-i18n-placeholder="profile.weightPlaceholder">
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="height">Рост (см)</label>
-                    <input type="number" class="form-input" id="height" min="100" max="250" placeholder="Например: 175">
+                    <label class="form-label" for="height" data-i18n="profile.height">Рост (см)</label>
+                    <input type="number" class="form-input" id="height" min="100" max="250" placeholder="Например: 175" data-i18n-placeholder="profile.heightPlaceholder">
                 </div>
             </form>
             <div class="profile-stats" id="profileStats" style="display: none;">
                 <div class="profile-stat">
-                    <div class="profile-stat-label">ИМТ</div>
+                    <div class="profile-stat-label" data-i18n="profile.bmi">ИМТ</div>
                     <div class="profile-stat-value" id="bmiValue">--</div>
                 </div>
                 <div class="profile-stat">
-                    <div class="profile-stat-label">Макс. пульс</div>
+                    <div class="profile-stat-label" data-i18n="profile.maxHr">Макс. пульс</div>
                     <div class="profile-stat-value" id="maxHrValue">--</div>
                 </div>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn modal-btn-cancel" id="profileCancel">Отмена</button>
-                <button class="modal-btn modal-btn-confirm" id="profileSave" style="background: rgba(0, 255, 136, 0.2); border-color: var(--accent-primary); color: var(--accent-primary);">Сохранить</button>
+                <button class="modal-btn modal-btn-cancel" id="profileCancel" data-i18n="common.cancel">Отмена</button>
+                <button class="modal-btn modal-btn-confirm" id="profileSave" style="background: rgba(0, 255, 136, 0.2); border-color: var(--accent-primary); color: var(--accent-primary);" data-i18n="common.save">Сохранить</button>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
+        // ---------- Localization (ru / en / et) ----------
+        const LANGUAGES = ['ru', 'en', 'et'];
+        const LOCALES = { ru: 'ru-RU', en: 'en-GB', et: 'et-EE' };
+
+        // Plural keys are objects keyed by Intl.PluralRules categories (one / few / many / other)
+        const I18N = {
+            ru: {
+                'meta.title': 'Бадминтон: Трекер Здоровья',
+                'lang.label': 'Язык',
+                'profile.button': '👤 Профиль',
+                'header.title': 'ТРЕКЕР ЗДОРОВЬЯ',
+                'header.subtitle': 'Анализ тренировок на основе TCX, GPX и FIT данных',
+                'upload.title': 'Загрузите файлы тренировок',
+                'upload.hint': 'Поддерживаются форматы: TCX, GPX, FIT (универсальная совместимость)',
+                'clear.button': '🗑️ Очистить все данные',
+                'loading': 'Обработка данных...',
+                'card.workouts.title': 'Всего тренировок',
+                'card.workouts.sub': 'За всё время',
+                'card.calories.title': 'Сожжено калорий',
+                'card.calories.sub': 'Общий расход энергии',
+                'card.hr.title': 'Средний пульс',
+                'card.hr.sub': 'Ударов в минуту',
+                'card.time.title': 'Общее время',
+                'card.time.sub': 'Активных тренировок',
+                'chart.dynamics.title': '📈 Динамика тренировок',
+                'chart.hr.title': '💗 Анализ пульса',
+                'insights.title': '💡 Рекомендации по здоровью',
+                'zones.title': '❤️ Зоны пульса',
+                'benchmarks.title': '📊 Сравнение с лучшими показателями',
+                'history.title': '📋 История тренировок',
+                'history.empty': 'Загрузите файлы тренировок для начала анализа',
+                'confirm.title': '⚠️ Подтверждение',
+                'confirm.text': 'Вы уверены, что хотите очистить все данные? Это действие нельзя отменить.',
+                'confirm.clear': 'Очистить',
+                'common.cancel': 'Отмена',
+                'common.save': 'Сохранить',
+                'profile.title': '👤 Мой профиль',
+                'profile.age': 'Возраст (лет)',
+                'profile.agePlaceholder': 'Например: 25',
+                'profile.gender': 'Пол',
+                'profile.genderNone': 'Не указан',
+                'profile.genderMale': 'Мужской',
+                'profile.genderFemale': 'Женский',
+                'profile.weight': 'Вес (кг)',
+                'profile.weightPlaceholder': 'Например: 70',
+                'profile.height': 'Рост (см)',
+                'profile.heightPlaceholder': 'Например: 175',
+                'profile.bmi': 'ИМТ',
+                'profile.maxHr': 'Макс. пульс',
+
+                'unit.bpm': 'уд/мин',
+                'unit.kcal': 'ккал',
+                'unit.kcalPerKg': 'ккал/кг',
+                'unit.min': 'мин',
+                'unit.h': 'ч',
+                'unit.km': 'км',
+                'unit.times': { one: 'раз', few: 'раза', many: 'раз', other: 'раза' },
+
+                'notify.dropNoFiles': 'Файлы не получены. Если перетаскиваете из Telegram, сначала сохраните их в папку',
+                'notify.cleared': 'Все данные очищены',
+                'notify.profileSaved': 'Профиль сохранён',
+                'notify.duplicates': 'Обнаружено и удалено дубликатов: {n}',
+                'notify.loaded': {
+                    one: 'Загружена {n} тренировка',
+                    few: 'Загружено {n} тренировки',
+                    many: 'Загружено {n} тренировок',
+                    other: 'Загружено {n} тренировки'
+                },
+                'notify.fitModuleFailed': 'Не удалось загрузить модуль для FIT-файлов. Проверьте подключение к интернету',
+                'alert.clearError': 'Ошибка при очистке данных: {error}',
+                'alert.loadFailed': 'Не удалось загрузить файлы. Проверьте консоль (F12) для деталей или попробуйте другие файлы.',
+
+                'badge.min': 'мин.',
+                'badge.minHrTitle': 'Минимальный пульс',
+                'badge.effect': 'эффект',
+                'badge.effectTitle': 'Тренировочный эффект по данным часов (0–5): аэробный / анаэробный',
+                'badge.load': 'нагрузка',
+                'badge.loadTitle': 'Тренировочная нагрузка по данным часов',
+                'chart.duration': 'Длительность',
+                'chart.avgHr': 'Средний пульс',
+                'chart.hrRange': '(мин. {min}, макс. {max})',
+
+                'bmi.under': 'Недостаточный',
+                'bmi.normal': 'Нормальный',
+                'bmi.over': 'Избыточный',
+                'bmi.obese': 'Ожирение',
+
+                'ins.regular.title': 'Отличная регулярность',
+                'ins.regular.text': 'Вы тренируетесь {n} раз в неделю. Это оптимальный режим для поддержания формы и развития выносливости.',
+                'ins.moreOften.title': 'Увеличьте частоту',
+                'ins.moreOften.text': 'Вы тренируетесь {n} раз в неделю. Для лучших результатов рекомендуется 3-4 тренировки в неделю.',
+                'ins.irregular.title': 'Нужна регулярность',
+                'ins.irregular.text': 'Старайтесь тренироваться минимум 2-3 раза в неделю для поддержания физической формы.',
+                'ins.hrPct': ' ({pct}% от максимума)',
+                'ins.hrOptimal.title': 'Оптимальная интенсивность',
+                'ins.hrOptimal.text': 'Средний пульс {hr} уд/мин{pct} находится в аэробной зоне, что отлично для выносливости и сжигания жира.',
+                'ins.hrHigh.title': 'Высокая интенсивность',
+                'ins.hrHigh.text': 'Средний пульс {hr} уд/мин{pct} довольно высок. Убедитесь, что включаете восстановительные периоды между интенсивными тренировками.',
+                'ins.hrModerate.title': 'Умеренная нагрузка',
+                'ins.hrModerate.text': 'Средний пульс {hr} уд/мин{pct}. Можно увеличить интенсивность для лучшего эффекта тренировок.',
+                'ins.perKg': ' ({v} ккал/кг)',
+                'ins.energyHigh.title': 'Высокий расход энергии',
+                'ins.energyHigh.text': 'В среднем вы сжигаете {kcal} ккал за тренировку{perKg}. Отличный показатель! Не забывайте о правильном питании для восстановления.',
+                'ins.energyGrow.title': 'Потенциал для роста',
+                'ins.energyGrow.text': 'Средний расход {kcal} ккал за тренировку{perKg}. Можно увеличить продолжительность или интенсивность игры.',
+                'ins.recovery.title': 'Важность восстановления',
+                'ins.recovery.text': 'Средняя продолжительность тренировок {min} мин. При такой нагрузке необходим полноценный сон (7-9 часов) и день отдыха между тренировками.',
+                'ins.bmiNormal.title': 'Идеальный вес',
+                'ins.bmiNormal.text': 'Ваш ИМТ {bmi} в норме. Продолжайте поддерживать текущий режим тренировок и питания.',
+                'ins.bmiLose.title': 'Фокус на снижение веса',
+                'ins.bmiLose.text': 'Ваш ИМТ {bmi} ({category}). Бадминтон - отличный выбор для снижения веса! Рекомендуется сочетать с правильным питанием и увеличить частоту тренировок до 4-5 раз в неделю.',
+                'ins.bmiGain.title': 'Набор массы',
+                'ins.bmiGain.text': 'Ваш ИМТ {bmi} ({category}). Обратите внимание на калорийность питания и добавьте силовые тренировки для набора мышечной массы.',
+                'ins.water.title': 'Не забывайте о воде',
+                'ins.water.text': 'При средней интенсивности ваших тренировок рекомендуется выпивать около {ml} мл воды во время игры (каждые 15 минут по 200 мл).',
+                'ins.postMeal.title': 'Питание для восстановления',
+                'ins.postMeal.text': 'После интенсивной тренировки ({kcal} ккал) восполните энергию в течение 30-60 минут: углеводы + белок (например, банан + протеиновый коктейль). Это ускорит восстановление мышц.',
+                'ins.preMeal.title': 'Питание перед тренировкой',
+                'ins.preMeal.text': 'За 1-2 часа до тренировки съешьте легкоусвояемые углеводы (овсянка, банан, тост с мёдом) для поддержания энергии на протяжении всей игры ({min} мин).',
+
+                'zone.rest': 'Отдых',
+                'zone.warmup': 'Разминка',
+                'zone.fat': 'Жиросжигание',
+                'zone.aerobic': 'Аэробная',
+                'zone.anaerobic': 'Анаэробная',
+                'zone.max': 'Максимум',
+                'zone.timeShare': '{pct}% времени',
+
+                'progress.title': '📈 Прогресс по неделям',
+                'progress.workouts': 'Тренировки',
+                'progress.calories': 'Калории',
+                'progress.avgHr': 'Средний пульс',
+                'progress.time': 'Время',
+                'progress.thisWeek': '{title} (эта неделя)',
+                'progress.vsLast': '{change}% от прошлой',
+
+                'bench.calories': 'Калории за тренировку',
+                'bench.duration': 'Продолжительность',
+                'bench.ageCalories': 'Калории vs средние для возраста',
+                'bench.ageAvg': 'Средний показатель для вашего возраста: {value}',
+                'bench.best': 'Ваш лучший результат: {value}',
+                'bench.forecast': '🔮 Прогноз через месяц',
+                'forecast.growth': 'При текущем темпе роста интенсивности, через месяц вы будете сжигать около {value} за тренировку. ',
+                'forecast.decline': 'Интенсивность тренировок снижается. Рекомендуется увеличить продолжительность или темп игры. ',
+                'forecast.stable': 'Вы поддерживаете стабильную интенсивность тренировок. ',
+                'forecast.moreOften': 'Частота тренировок растёт — отличная тенденция! ',
+                'forecast.monthly': 'Ожидаемый расход за месяц: {value}.'
+            },
+            en: {
+                'meta.title': 'Badminton: Health Tracker',
+                'lang.label': 'Language',
+                'profile.button': '👤 Profile',
+                'header.title': 'HEALTH TRACKER',
+                'header.subtitle': 'Workout analysis from TCX, GPX and FIT data',
+                'upload.title': 'Upload your workout files',
+                'upload.hint': 'Supported formats: TCX, GPX, FIT (universal compatibility)',
+                'clear.button': '🗑️ Clear all data',
+                'loading': 'Processing data...',
+                'card.workouts.title': 'Total workouts',
+                'card.workouts.sub': 'All time',
+                'card.calories.title': 'Calories burned',
+                'card.calories.sub': 'Total energy expenditure',
+                'card.hr.title': 'Average heart rate',
+                'card.hr.sub': 'Beats per minute',
+                'card.time.title': 'Total time',
+                'card.time.sub': 'Of active training',
+                'chart.dynamics.title': '📈 Workout trends',
+                'chart.hr.title': '💗 Heart rate analysis',
+                'insights.title': '💡 Health recommendations',
+                'zones.title': '❤️ Heart rate zones',
+                'benchmarks.title': '📊 Compared with your best',
+                'history.title': '📋 Workout history',
+                'history.empty': 'Upload workout files to start the analysis',
+                'confirm.title': '⚠️ Confirmation',
+                'confirm.text': 'Are you sure you want to clear all data? This cannot be undone.',
+                'confirm.clear': 'Clear',
+                'common.cancel': 'Cancel',
+                'common.save': 'Save',
+                'profile.title': '👤 My profile',
+                'profile.age': 'Age (years)',
+                'profile.agePlaceholder': 'e.g. 25',
+                'profile.gender': 'Gender',
+                'profile.genderNone': 'Not specified',
+                'profile.genderMale': 'Male',
+                'profile.genderFemale': 'Female',
+                'profile.weight': 'Weight (kg)',
+                'profile.weightPlaceholder': 'e.g. 70',
+                'profile.height': 'Height (cm)',
+                'profile.heightPlaceholder': 'e.g. 175',
+                'profile.bmi': 'BMI',
+                'profile.maxHr': 'Max heart rate',
+
+                'unit.bpm': 'bpm',
+                'unit.kcal': 'kcal',
+                'unit.kcalPerKg': 'kcal/kg',
+                'unit.min': 'min',
+                'unit.h': 'h',
+                'unit.km': 'km',
+                'unit.times': { one: 'time', other: 'times' },
+
+                'notify.dropNoFiles': 'No files received. If you are dragging from Telegram, save them to a folder first',
+                'notify.cleared': 'All data cleared',
+                'notify.profileSaved': 'Profile saved',
+                'notify.duplicates': 'Duplicates found and removed: {n}',
+                'notify.loaded': { one: 'Loaded {n} workout', other: 'Loaded {n} workouts' },
+                'notify.fitModuleFailed': 'Could not load the FIT file module. Check your internet connection',
+                'alert.clearError': 'Error while clearing data: {error}',
+                'alert.loadFailed': 'Could not load the files. Check the console (F12) for details or try other files.',
+
+                'badge.min': 'min',
+                'badge.minHrTitle': 'Minimum heart rate',
+                'badge.effect': 'effect',
+                'badge.effectTitle': 'Training effect from the watch (0–5): aerobic / anaerobic',
+                'badge.load': 'load',
+                'badge.loadTitle': 'Training load from the watch',
+                'chart.duration': 'Duration',
+                'chart.avgHr': 'Average heart rate',
+                'chart.hrRange': '(min {min}, max {max})',
+
+                'bmi.under': 'Underweight',
+                'bmi.normal': 'Normal',
+                'bmi.over': 'Overweight',
+                'bmi.obese': 'Obese',
+
+                'ins.regular.title': 'Great consistency',
+                'ins.regular.text': 'You train {n} times a week. That is an optimal routine for staying fit and building endurance.',
+                'ins.moreOften.title': 'Train more often',
+                'ins.moreOften.text': 'You train {n} times a week. For better results, 3–4 workouts a week are recommended.',
+                'ins.irregular.title': 'Consistency needed',
+                'ins.irregular.text': 'Try to train at least 2–3 times a week to stay in shape.',
+                'ins.hrPct': ' ({pct}% of max)',
+                'ins.hrOptimal.title': 'Optimal intensity',
+                'ins.hrOptimal.text': 'Your average heart rate of {hr} bpm{pct} is in the aerobic zone, which is great for endurance and fat burning.',
+                'ins.hrHigh.title': 'High intensity',
+                'ins.hrHigh.text': 'Your average heart rate of {hr} bpm{pct} is quite high. Make sure you include recovery periods between hard sessions.',
+                'ins.hrModerate.title': 'Moderate load',
+                'ins.hrModerate.text': 'Average heart rate: {hr} bpm{pct}. You can raise the intensity to get more out of your workouts.',
+                'ins.perKg': ' ({v} kcal/kg)',
+                'ins.energyHigh.title': 'High energy expenditure',
+                'ins.energyHigh.text': 'On average you burn {kcal} kcal per workout{perKg}. Excellent! Don\'t forget proper nutrition for recovery.',
+                'ins.energyGrow.title': 'Room to grow',
+                'ins.energyGrow.text': 'Average burn: {kcal} kcal per workout{perKg}. You can increase the duration or intensity of play.',
+                'ins.recovery.title': 'Recovery matters',
+                'ins.recovery.text': 'Your workouts last {min} min on average. With this load you need full sleep (7–9 hours) and a rest day between workouts.',
+                'ins.bmiNormal.title': 'Healthy weight',
+                'ins.bmiNormal.text': 'Your BMI of {bmi} is in the normal range. Keep up your current training and nutrition routine.',
+                'ins.bmiLose.title': 'Focus on weight loss',
+                'ins.bmiLose.text': 'Your BMI is {bmi} ({category}). Badminton is a great choice for losing weight! Combine it with proper nutrition and train 4–5 times a week.',
+                'ins.bmiGain.title': 'Building mass',
+                'ins.bmiGain.text': 'Your BMI is {bmi} ({category}). Watch your calorie intake and add strength training to build muscle.',
+                'ins.water.title': 'Stay hydrated',
+                'ins.water.text': 'At your average workout intensity, aim to drink about {ml} ml of water during play (200 ml every 15 minutes).',
+                'ins.postMeal.title': 'Recovery nutrition',
+                'ins.postMeal.text': 'After an intense workout ({kcal} kcal), refuel within 30–60 minutes: carbs + protein (e.g. a banana + a protein shake). This speeds up muscle recovery.',
+                'ins.preMeal.title': 'Pre-workout nutrition',
+                'ins.preMeal.text': '1–2 hours before training, eat easily digestible carbs (oatmeal, a banana, toast with honey) to keep your energy up for the whole game ({min} min).',
+
+                'zone.rest': 'Rest',
+                'zone.warmup': 'Warm-up',
+                'zone.fat': 'Fat burn',
+                'zone.aerobic': 'Aerobic',
+                'zone.anaerobic': 'Anaerobic',
+                'zone.max': 'Maximum',
+                'zone.timeShare': '{pct}% of time',
+
+                'progress.title': '📈 Weekly progress',
+                'progress.workouts': 'Workouts',
+                'progress.calories': 'Calories',
+                'progress.avgHr': 'Average heart rate',
+                'progress.time': 'Time',
+                'progress.thisWeek': '{title} (this week)',
+                'progress.vsLast': '{change}% vs last week',
+
+                'bench.calories': 'Calories per workout',
+                'bench.duration': 'Duration',
+                'bench.ageCalories': 'Calories vs. average for your age',
+                'bench.ageAvg': 'Average for your age: {value}',
+                'bench.best': 'Your best: {value}',
+                'bench.forecast': '🔮 One-month forecast',
+                'forecast.growth': 'If your intensity keeps growing at this pace, in a month you will burn about {value} per workout. ',
+                'forecast.decline': 'Your training intensity is dropping. Try increasing the duration or pace of play. ',
+                'forecast.stable': 'You are keeping your training intensity steady. ',
+                'forecast.moreOften': 'You are training more often — a great trend! ',
+                'forecast.monthly': 'Expected burn over the month: {value}.'
+            },
+            et: {
+                'meta.title': 'Sulgpall: terviseträker',
+                'lang.label': 'Keel',
+                'profile.button': '👤 Profiil',
+                'header.title': 'TERVISETRÄKER',
+                'header.subtitle': 'Treeningute analüüs TCX-, GPX- ja FIT-andmete põhjal',
+                'upload.title': 'Laadi üles treeningufailid',
+                'upload.hint': 'Toetatud vormingud: TCX, GPX, FIT (universaalne ühilduvus)',
+                'clear.button': '🗑️ Kustuta kõik andmed',
+                'loading': 'Andmete töötlemine...',
+                'card.workouts.title': 'Treeninguid kokku',
+                'card.workouts.sub': 'Kogu aja jooksul',
+                'card.calories.title': 'Põletatud kalorid',
+                'card.calories.sub': 'Kogu energiakulu',
+                'card.hr.title': 'Keskmine pulss',
+                'card.hr.sub': 'Lööki minutis',
+                'card.time.title': 'Koguaeg',
+                'card.time.sub': 'Aktiivset treeningut',
+                'chart.dynamics.title': '📈 Treeningute dünaamika',
+                'chart.hr.title': '💗 Pulsi analüüs',
+                'insights.title': '💡 Soovitused tervisele',
+                'zones.title': '❤️ Pulsitsoonid',
+                'benchmarks.title': '📊 Võrdlus parimate tulemustega',
+                'history.title': '📋 Treeningute ajalugu',
+                'history.empty': 'Analüüsi alustamiseks laadi üles treeningufailid',
+                'confirm.title': '⚠️ Kinnitus',
+                'confirm.text': 'Kas oled kindel, et soovid kõik andmed kustutada? Seda ei saa tagasi võtta.',
+                'confirm.clear': 'Kustuta',
+                'common.cancel': 'Tühista',
+                'common.save': 'Salvesta',
+                'profile.title': '👤 Minu profiil',
+                'profile.age': 'Vanus (aastat)',
+                'profile.agePlaceholder': 'Näiteks: 25',
+                'profile.gender': 'Sugu',
+                'profile.genderNone': 'Määramata',
+                'profile.genderMale': 'Mees',
+                'profile.genderFemale': 'Naine',
+                'profile.weight': 'Kaal (kg)',
+                'profile.weightPlaceholder': 'Näiteks: 70',
+                'profile.height': 'Pikkus (cm)',
+                'profile.heightPlaceholder': 'Näiteks: 175',
+                'profile.bmi': 'KMI',
+                'profile.maxHr': 'Maks. pulss',
+
+                'unit.bpm': 'lööki/min',
+                'unit.kcal': 'kcal',
+                'unit.kcalPerKg': 'kcal/kg',
+                'unit.min': 'min',
+                'unit.h': 'h',
+                'unit.km': 'km',
+                'unit.times': { one: 'kord', other: 'korda' },
+
+                'notify.dropNoFiles': 'Faile ei saadud. Kui lohistad Telegramist, salvesta need enne kausta',
+                'notify.cleared': 'Kõik andmed kustutatud',
+                'notify.profileSaved': 'Profiil salvestatud',
+                'notify.duplicates': 'Leitud ja eemaldatud duplikaate: {n}',
+                'notify.loaded': { one: 'Laaditud {n} treening', other: 'Laaditud {n} treeningut' },
+                'notify.fitModuleFailed': 'FIT-failide moodulit ei õnnestunud laadida. Kontrolli internetiühendust',
+                'alert.clearError': 'Viga andmete kustutamisel: {error}',
+                'alert.loadFailed': 'Faile ei õnnestunud laadida. Üksikasjad leiad konsoolist (F12) või proovi teisi faile.',
+
+                'badge.min': 'min',
+                'badge.minHrTitle': 'Minimaalne pulss',
+                'badge.effect': 'efekt',
+                'badge.effectTitle': 'Kella mõõdetud treeningefekt (0–5): aeroobne / anaeroobne',
+                'badge.load': 'koormus',
+                'badge.loadTitle': 'Kella mõõdetud treeningkoormus',
+                'chart.duration': 'Kestus',
+                'chart.avgHr': 'Keskmine pulss',
+                'chart.hrRange': '(min {min}, maks {max})',
+
+                'bmi.under': 'Alakaal',
+                'bmi.normal': 'Normaalkaal',
+                'bmi.over': 'Ülekaal',
+                'bmi.obese': 'Rasvumine',
+
+                'ins.regular.title': 'Suurepärane regulaarsus',
+                'ins.regular.text': 'Treenid {n} korda nädalas. See on optimaalne režiim vormi hoidmiseks ja vastupidavuse arendamiseks.',
+                'ins.moreOften.title': 'Treeni sagedamini',
+                'ins.moreOften.text': 'Treenid {n} korda nädalas. Paremate tulemuste jaoks soovitatakse 3–4 treeningut nädalas.',
+                'ins.irregular.title': 'Vaja on regulaarsust',
+                'ins.irregular.text': 'Püüa treenida vähemalt 2–3 korda nädalas, et vormis püsida.',
+                'ins.hrPct': ' ({pct}% maksimumist)',
+                'ins.hrOptimal.title': 'Optimaalne intensiivsus',
+                'ins.hrOptimal.text': 'Keskmine pulss {hr} lööki/min{pct} on aeroobses tsoonis, mis sobib suurepäraselt vastupidavuse ja rasvapõletuse jaoks.',
+                'ins.hrHigh.title': 'Kõrge intensiivsus',
+                'ins.hrHigh.text': 'Keskmine pulss {hr} lööki/min{pct} on üsna kõrge. Jäta intensiivsete treeningute vahele kindlasti taastumisaega.',
+                'ins.hrModerate.title': 'Mõõdukas koormus',
+                'ins.hrModerate.text': 'Keskmine pulss {hr} lööki/min{pct}. Treeningute parema mõju saavutamiseks võid intensiivsust tõsta.',
+                'ins.perKg': ' ({v} kcal/kg)',
+                'ins.energyHigh.title': 'Suur energiakulu',
+                'ins.energyHigh.text': 'Keskmiselt põletad treeningu kohta {kcal} kcal{perKg}. Suurepärane tulemus! Ära unusta taastumiseks õiget toitumist.',
+                'ins.energyGrow.title': 'Arenguruumi on',
+                'ins.energyGrow.text': 'Keskmine kulu on {kcal} kcal treeningu kohta{perKg}. Võid pikendada mängu kestust või tõsta intensiivsust.',
+                'ins.recovery.title': 'Taastumine on oluline',
+                'ins.recovery.text': 'Treeningu keskmine kestus on {min} min. Sellise koormuse juures on vaja täisväärtuslikku und (7–9 tundi) ja puhkepäeva treeningute vahel.',
+                'ins.bmiNormal.title': 'Tervislik kaal',
+                'ins.bmiNormal.text': 'Sinu KMI {bmi} on normis. Jätka praeguse treening- ja toitumisrežiimiga.',
+                'ins.bmiLose.title': 'Fookus kaalulangusel',
+                'ins.bmiLose.text': 'Sinu KMI on {bmi} ({category}). Sulgpall on kaalu langetamiseks suurepärane valik! Kombineeri seda õige toitumisega ja treeni 4–5 korda nädalas.',
+                'ins.bmiGain.title': 'Massi kasvatamine',
+                'ins.bmiGain.text': 'Sinu KMI on {bmi} ({category}). Jälgi toidu kalorsust ja lisa lihasmassi kasvatamiseks jõutreeninguid.',
+                'ins.water.title': 'Ära unusta vett',
+                'ins.water.text': 'Sinu treeningute keskmise intensiivsuse juures soovitatakse mängu ajal juua umbes {ml} ml vett (200 ml iga 15 minuti järel).',
+                'ins.postMeal.title': 'Taastav toitumine',
+                'ins.postMeal.text': 'Pärast intensiivset treeningut ({kcal} kcal) taasta energia 30–60 minuti jooksul: süsivesikud + valk (nt banaan + proteiinijook). See kiirendab lihaste taastumist.',
+                'ins.preMeal.title': 'Toitumine enne treeningut',
+                'ins.preMeal.text': '1–2 tundi enne treeningut söö kergesti seeditavaid süsivesikuid (kaerahelbepuder, banaan, röstsai meega), et energiat jaguks kogu mänguks ({min} min).',
+
+                'zone.rest': 'Puhkus',
+                'zone.warmup': 'Soojendus',
+                'zone.fat': 'Rasvapõletus',
+                'zone.aerobic': 'Aeroobne',
+                'zone.anaerobic': 'Anaeroobne',
+                'zone.max': 'Maksimum',
+                'zone.timeShare': '{pct}% ajast',
+
+                'progress.title': '📈 Nädalane areng',
+                'progress.workouts': 'Treeningud',
+                'progress.calories': 'Kalorid',
+                'progress.avgHr': 'Keskmine pulss',
+                'progress.time': 'Aeg',
+                'progress.thisWeek': '{title} (see nädal)',
+                'progress.vsLast': '{change}% eelmise nädalaga võrreldes',
+
+                'bench.calories': 'Kalorid treeningu kohta',
+                'bench.duration': 'Kestus',
+                'bench.ageCalories': 'Kalorid vs sinu vanuse keskmine',
+                'bench.ageAvg': 'Sinu vanuse keskmine: {value}',
+                'bench.best': 'Sinu parim tulemus: {value}',
+                'bench.forecast': '🔮 Prognoos kuu pärast',
+                'forecast.growth': 'Kui intensiivsus kasvab samas tempos, põletad kuu pärast treeningu kohta umbes {value}. ',
+                'forecast.decline': 'Treeningute intensiivsus langeb. Proovi pikendada mängu kestust või tõsta tempot. ',
+                'forecast.stable': 'Hoiad treeningute intensiivsust stabiilsena. ',
+                'forecast.moreOften': 'Treenid üha sagedamini — suurepärane suundumus! ',
+                'forecast.monthly': 'Oodatav kulu kuus: {value}.'
+            }
+        };
+
+        // Sport types: key -> icon and names. Keys are FIT sport / sub-sport values,
+        // so a FIT workout keeps a translatable sport; TCX/GPX names are matched against these.
+        const SPORTS = {
+            generic: { icon: '💪', ru: 'Тренировка', en: 'Workout', et: 'Treening' },
+            running: { icon: '🏃', ru: 'Бег', en: 'Running', et: 'Jooksmine' },
+            treadmill: { icon: '🏃', ru: 'Бег на дорожке', en: 'Treadmill', et: 'Jooksulint' },
+            indoorRunning: { icon: '🏃', ru: 'Бег в помещении', en: 'Indoor running', et: 'Sisejooks' },
+            trail: { icon: '🏃', ru: 'Трейлраннинг', en: 'Trail running', et: 'Rajajooks' },
+            cycling: { icon: '🚴', ru: 'Велосипед', en: 'Cycling', et: 'Rattasõit' },
+            indoorCycling: { icon: '🚴', ru: 'Велотренажёр', en: 'Indoor cycling', et: 'Siserattasõit' },
+            spin: { icon: '🚴', ru: 'Сайкл', en: 'Spinning', et: 'Spinning' },
+            mountain: { icon: '🚵', ru: 'Маунтинбайк', en: 'Mountain biking', et: 'Maastikurattasõit' },
+            walking: { icon: '🚶', ru: 'Ходьба', en: 'Walking', et: 'Kõndimine' },
+            indoorWalking: { icon: '🚶', ru: 'Ходьба в помещении', en: 'Indoor walking', et: 'Sisekõnd' },
+            casualWalking: { icon: '🚶', ru: 'Прогулка', en: 'Casual walk', et: 'Jalutuskäik' },
+            speedWalking: { icon: '🚶', ru: 'Спортивная ходьба', en: 'Speed walking', et: 'Kiirkõnd' },
+            hiking: { icon: '🥾', ru: 'Хайкинг', en: 'Hiking', et: 'Matkamine' },
+            swimming: { icon: '🏊', ru: 'Плавание', en: 'Swimming', et: 'Ujumine' },
+            lapSwimming: { icon: '🏊', ru: 'Плавание в бассейне', en: 'Pool swimming', et: 'Basseiniujumine' },
+            openWater: { icon: '🏊', ru: 'Плавание на открытой воде', en: 'Open water swimming', et: 'Avaveeujumine' },
+            training: { icon: '💪', ru: 'Тренировка', en: 'Training', et: 'Treening' },
+            fitnessEquipment: { icon: '🏋️', ru: 'Тренажёр', en: 'Fitness equipment', et: 'Trenažöör' },
+            strengthTraining: { icon: '💪', ru: 'Силовая тренировка', en: 'Strength training', et: 'Jõutreening' },
+            cardioTraining: { icon: '❤️', ru: 'Кардиотренировка', en: 'Cardio training', et: 'Kardiotreening' },
+            flexibilityTraining: { icon: '🧘', ru: 'Растяжка', en: 'Flexibility training', et: 'Venitus' },
+            yoga: { icon: '🧘', ru: 'Йога', en: 'Yoga', et: 'Jooga' },
+            pilates: { icon: '🧘', ru: 'Пилатес', en: 'Pilates', et: 'Pilates' },
+            hiit: { icon: '⚡', ru: 'Интервальная тренировка (HIIT)', en: 'Interval training (HIIT)', et: 'Intervalltreening (HIIT)' },
+            tabata: { icon: '⚡', ru: 'Интервальная тренировка (табата)', en: 'Interval training (Tabata)', et: 'Intervalltreening (tabata)' },
+            amrap: { icon: '⚡', ru: 'Интервальная тренировка (AMRAP)', en: 'Interval training (AMRAP)', et: 'Intervalltreening (AMRAP)' },
+            emom: { icon: '⚡', ru: 'Интервальная тренировка (EMOM)', en: 'Interval training (EMOM)', et: 'Intervalltreening (EMOM)' },
+            elliptical: { icon: '🏋️', ru: 'Эллипс', en: 'Elliptical', et: 'Elliptiline trenažöör' },
+            indoorRowing: { icon: '🚣', ru: 'Гребной тренажёр', en: 'Indoor rowing', et: 'Sõudeergomeeter' },
+            stairClimbing: { icon: '🏋️', ru: 'Степпер', en: 'Stair climbing', et: 'Trepironimine' },
+            racket: { icon: '🏸', ru: 'Ракеточный спорт', en: 'Racket sport', et: 'Reketisport' },
+            badminton: { icon: '🏸', ru: 'Бадминтон', en: 'Badminton', et: 'Sulgpall' },
+            tableTennis: { icon: '🏓', ru: 'Настольный теннис', en: 'Table tennis', et: 'Lauatennis' },
+            squash: { icon: '🎾', ru: 'Сквош', en: 'Squash', et: 'Squash' },
+            padel: { icon: '🎾', ru: 'Падел', en: 'Padel', et: 'Padel' },
+            pickleball: { icon: '🏓', ru: 'Пиклбол', en: 'Pickleball', et: 'Pickleball' },
+            racquetball: { icon: '🎾', ru: 'Ракетбол', en: 'Racquetball', et: 'Racquetball' },
+            tennis: { icon: '🎾', ru: 'Теннис', en: 'Tennis', et: 'Tennis' },
+            basketball: { icon: '🏀', ru: 'Баскетбол', en: 'Basketball', et: 'Korvpall' },
+            soccer: { icon: '⚽', ru: 'Футбол', en: 'Football', et: 'Jalgpall' },
+            volleyball: { icon: '🏐', ru: 'Волейбол', en: 'Volleyball', et: 'Võrkpall' },
+            cricket: { icon: '🏏', ru: 'Крикет', en: 'Cricket', et: 'Kriket' },
+            rowing: { icon: '🚣', ru: 'Гребля', en: 'Rowing', et: 'Sõudmine' },
+            crossCountrySkiing: { icon: '⛷️', ru: 'Беговые лыжи', en: 'Cross-country skiing', et: 'Murdmaasuusatamine' },
+            alpineSkiing: { icon: '⛷️', ru: 'Горные лыжи', en: 'Alpine skiing', et: 'Mäesuusatamine' },
+            snowboarding: { icon: '🏂', ru: 'Сноуборд', en: 'Snowboarding', et: 'Lumelauasõit' },
+            inlineSkating: { icon: '⛸️', ru: 'Ролики', en: 'Inline skating', et: 'Rulluisutamine' },
+            iceSkating: { icon: '⛸️', ru: 'Коньки', en: 'Ice skating', et: 'Uisutamine' },
+            rockClimbing: { icon: '🧗', ru: 'Скалолазание', en: 'Rock climbing', et: 'Kaljuronimine' },
+            boxing: { icon: '🥊', ru: 'Бокс', en: 'Boxing', et: 'Poks' },
+            dance: { icon: '💃', ru: 'Танцы', en: 'Dance', et: 'Tantsimine' },
+            jumpRope: { icon: '🪢', ru: 'Скакалка', en: 'Jump rope', et: 'Hüppenöör' },
+            meditation: { icon: '🧘', ru: 'Медитация', en: 'Meditation', et: 'Meditatsioon' },
+            mobility: { icon: '🧘', ru: 'Мобильность', en: 'Mobility', et: 'Liikuvus' }
+        };
+
+        // Names that TCX/GPX files (Garmin, Zepp, Strava...) use for these sports
+        const SPORT_ALIASES = {
+            'other': 'generic', 'biking': 'cycling', 'outdoor running': 'running',
+            'outdoor cycling': 'cycling', 'pool swimming': 'lapSwimming',
+            'open water swimming': 'openWater', 'roller skating': 'inlineSkating',
+            'skiing': 'alpineSkiing', 'football': 'soccer',
+            // Zepp activity names (TCX <Notes>, GPX track name)
+            'интервальная тренировка': 'hiit', 'interval training': 'hiit', 'hiit': 'hiit',
+            'силовой тренинг': 'strengthTraining', 'strength training': 'strengthTraining'
+        };
+
+        // Too general to identify a sport when found inside a longer name
+        const GENERIC_SPORT_KEYS = ['generic', 'training', 'racket', 'fitnessEquipment'];
+
+        // Match a sport name from a file to a SPORTS key (any language, case-insensitive)
+        function sportKeyFromName(name) {
+            const needle = (name || '').trim().toLowerCase();
+            if (!needle) return null;
+
+            const known = Object.entries(SPORT_ALIASES).map(([alias, key]) => [alias, key]);
+            for (const [key, sport] of Object.entries(SPORTS)) {
+                LANGUAGES.forEach(lang => known.push([sport[lang].toLowerCase(), key]));
+            }
+
+            const exact = known.find(([candidate]) => candidate === needle);
+            if (exact) return exact[1];
+
+            // Zepp writes "<category> <type>", e.g. "Силовой тренинг Интервальная тренировка":
+            // take the known name that ends last (the type), the longest one on a tie
+            let best = null;
+            for (const [candidate, key] of known) {
+                if (GENERIC_SPORT_KEYS.includes(key) || candidate.length < 4) continue;
+                const escaped = candidate.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const match = new RegExp(`(^|[^\\p{L}])${escaped}(?=$|[^\\p{L}])`, 'u').exec(needle);
+                if (!match) continue;
+                const end = match.index + match[0].length;
+                if (!best || end > best.end || (end === best.end && candidate.length > best.length)) {
+                    best = { key, end, length: candidate.length };
+                }
+            }
+            return best ? best.key : null;
+        }
+
+        // Fallback icons for names we cannot map (e.g. "Силовой тренинг Интервальная тренировка"), first match wins
+        const SPORT_KEYWORD_ICONS = [
+            ['бадминтон', '🏸'], ['badminton', '🏸'], ['теннис', '🎾'], ['tennis', '🎾'],
+            ['интервал', '⚡'], ['interval', '⚡'], ['силов', '💪'], ['strength', '💪'],
+            ['бег', '🏃'], ['run', '🏃'], ['ходьб', '🚶'], ['прогулк', '🚶'], ['walk', '🚶'],
+            ['вело', '🚴'], ['cycl', '🚴'], ['bik', '🚴'], ['плаван', '🏊'], ['swim', '🏊'],
+            ['йога', '🧘'], ['yoga', '🧘'], ['лыж', '⛷️'], ['ski', '⛷️'],
+            ['футбол', '⚽'], ['баскетбол', '🏀'], ['ракеточ', '🏸']
+        ];
+
+        function sportIcon(workout) {
+            if (workout.sportKey && SPORTS[workout.sportKey]) return SPORTS[workout.sportKey].icon;
+            const lower = (workout.sport || '').toLowerCase();
+            return SPORT_KEYWORD_ICONS.find(([keyword]) => lower.includes(keyword))?.[1] || '💪';
+        }
+
+        function sportName(workout) {
+            if (workout.sportKey && SPORTS[workout.sportKey]) return SPORTS[workout.sportKey][currentLang];
+            return workout.sport || SPORTS.generic[currentLang];
+        }
+
+        function detectLanguage() {
+            try {
+                const saved = localStorage.getItem('appLanguage');
+                if (LANGUAGES.includes(saved)) return saved;
+            } catch (e) {
+                // storage unavailable (private mode) - fall back to the browser language
+            }
+            const preferred = navigator.languages && navigator.languages.length
+                ? navigator.languages
+                : [navigator.language || ''];
+            for (const tag of preferred) {
+                const code = (tag || '').slice(0, 2).toLowerCase();
+                if (LANGUAGES.includes(code)) return code;
+            }
+            return 'en';
+        }
+
+        let currentLang = detectLanguage();
+
+        function locale() {
+            return LOCALES[currentLang];
+        }
+
+        // t('key', { name: value }) -> translated string with {name} placeholders filled in
+        function t(key, params = {}) {
+            let text = I18N[currentLang][key] ?? I18N.en[key] ?? key;
+            if (typeof text === 'object') {
+                const form = new Intl.PluralRules(locale()).select(params.n ?? 0);
+                text = text[form] ?? text.other;
+            }
+            return text.replace(/\{(\w+)\}/g, (match, name) => (name in params ? params[name] : match));
+        }
+
+        function formatNumber(value, fractionDigits = 0) {
+            return Number(value).toLocaleString(locale(), {
+                minimumFractionDigits: fractionDigits,
+                maximumFractionDigits: fractionDigits
+            });
+        }
+
+        function formatDate(date, options) {
+            return date.toLocaleDateString(locale(), options);
+        }
+
+        function applyStaticTranslations() {
+            document.documentElement.lang = currentLang;
+            document.title = t('meta.title');
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                el.textContent = t(el.dataset.i18n);
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                el.placeholder = t(el.dataset.i18nPlaceholder);
+            });
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                const active = btn.dataset.lang === currentLang;
+                btn.classList.toggle('active', active);
+                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+            document.getElementById('langSwitch').setAttribute('aria-label', t('lang.label'));
+        }
+
+        function setLanguage(lang) {
+            if (!LANGUAGES.includes(lang) || lang === currentLang) return;
+            currentLang = lang;
+            try {
+                localStorage.setItem('appLanguage', lang);
+            } catch (e) {
+                // not critical: the choice just will not be remembered
+            }
+            applyStaticTranslations();
+            // Re-render everything that was built from the loaded workouts
+            if (workoutsData.length > 0) {
+                updateDashboard();
+                generateInsights();
+                analyzeHeartRateZones();
+                displayWeeklyProgress();
+                displayBenchmarks();
+            } else {
+                renderEmptyWorkoutsList();
+                document.getElementById('totalTime').textContent = `0${t('unit.h')}`;
+            }
+        }
+
+        function renderEmptyWorkoutsList() {
+            document.getElementById('workoutsList').innerHTML = `
+                <div class="chart-title">${t('history.title')}</div>
+                <div class="empty-state">
+                    <div class="empty-icon">📁</div>
+                    <div>${t('history.empty')}</div>
+                </div>
+            `;
+        }
+
         let workoutsData = [];
         let charts = {};
         let userProfile = {
@@ -1048,21 +1751,35 @@
 
         // Get BMI category
         function getBMICategory(bmi) {
-            if (bmi < 18.5) return 'Недостаточный';
-            if (bmi < 25) return 'Нормальный';
-            if (bmi < 30) return 'Избыточный';
-            return 'Ожирение';
+            if (bmi < 18.5) return 'under';
+            if (bmi < 25) return 'normal';
+            if (bmi < 30) return 'over';
+            return 'obese';
         }
 
         // Load profile on startup
         loadProfile();
 
+        applyStaticTranslations();
+        document.getElementById('totalTime').textContent = `0${t('unit.h')}`;
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+        });
+
         // Notification system
         function showNotification(message, type = 'info', duration = 3000) {
+            // Notifications stack in one column instead of covering each other
+            let stack = document.getElementById('notificationStack');
+            if (!stack) {
+                stack = document.createElement('div');
+                stack.id = 'notificationStack';
+                stack.className = 'notification-stack';
+                document.body.appendChild(stack);
+            }
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
-            document.body.appendChild(notification);
+            stack.appendChild(notification);
 
             setTimeout(() => {
                 notification.style.animation = 'slideInRight 0.3s ease-out reverse';
@@ -1090,7 +1807,7 @@
             uploadZone.style.borderColor = 'var(--border-color)';
             // Some apps (e.g. Telegram Desktop with several files) drop links instead of files
             if (e.dataTransfer.files.length === 0) {
-                showNotification('Файлы не получены. Если перетаскиваете из Telegram, сначала сохраните их в папку', 'info', 5000);
+                showNotification(t('notify.dropNoFiles'), 'info', 5000);
                 return;
             }
             handleFiles(e.dataTransfer.files);
@@ -1160,7 +1877,7 @@
                 document.getElementById('totalWorkouts').textContent = '0';
                 document.getElementById('totalCalories').textContent = '0';
                 document.getElementById('avgHeartRate').textContent = '--';
-                document.getElementById('totalTime').textContent = '0ч';
+                document.getElementById('totalTime').textContent = `0${t('unit.h')}`;
                 console.log('Stats reset');
                 
                 // Hide sections
@@ -1171,21 +1888,14 @@
                 console.log('Sections hidden');
                 
                 // Reset workouts list
-                const listContainer = document.getElementById('workoutsList');
-                listContainer.innerHTML = `
-                    <div class="chart-title">📋 История тренировок</div>
-                    <div class="empty-state">
-                        <div class="empty-icon">📁</div>
-                        <div>Загрузите файлы тренировок для начала анализа</div>
-                    </div>
-                `;
+                renderEmptyWorkoutsList();
                 console.log('Workout list reset');
                 
-                showNotification('Все данные очищены', 'info');
+                showNotification(t('notify.cleared'), 'info');
                 console.log('Data cleared successfully');
             } catch (error) {
                 console.error('Error during clear:', error);
-                alert('Ошибка при очистке данных: ' + error.message);
+                alert(t('alert.clearError', { error: error.message }));
             }
         });
 
@@ -1253,7 +1963,7 @@
             saveProfile();
             
             profileModal.classList.remove('active');
-            showNotification('Профиль сохранён', 'info');
+            showNotification(t('notify.profileSaved'), 'info');
             
             // Regenerate insights with new profile data
             if (workoutsData.length > 0) {
@@ -1347,11 +2057,11 @@
                 console.log(`Loaded ${newWorkouts.length} files, ${duplicatesRemoved} duplicates removed. Total: ${finalCount} workouts`);
                 
                 if (duplicatesRemoved > 0) {
-                    showNotification(`Обнаружено и удалено дубликатов: ${duplicatesRemoved}`, 'info');
+                    showNotification(t('notify.duplicates', { n: duplicatesRemoved }), 'info');
                 }
                 
                 if (newWorkouts.length > 0) {
-                    showNotification(`Загружено ${newWorkouts.length} тренировок`, 'info');
+                    showNotification(t('notify.loaded', { n: newWorkouts.length }), 'info');
                 }
                 
                 workoutsData.sort((a, b) => b.date - a.date);
@@ -1376,7 +2086,7 @@
                     console.log(`File ${i + 1}: ${file.name}, Type: ${file.type}, Size: ${file.size}`);
                 }
                 
-                alert('Не удалось загрузить файлы. Проверьте консоль (F12) для деталей или попробуйте другие файлы.');
+                alert(t('alert.loadFailed'));
             }
         }
 
@@ -1424,8 +2134,9 @@
             // and puts the real activity name ("Бадминтон", ...) into <Notes>
             const sportAttr = activity.getAttribute('Sport');
             const notes = activity.querySelector('Notes')?.textContent.trim();
-            const sport = (!sportAttr || sportAttr === 'Other') && notes ? notes : (sportAttr || 'Тренировка');
-            console.log('TCX Sport attribute:', activity.getAttribute('Sport'), '-> sport:', sport);
+            const sport = (!sportAttr || sportAttr === 'Other') && notes ? notes : (sportAttr || null);
+            const sportKey = sportKeyFromName(sport);
+            console.log('TCX Sport attribute:', activity.getAttribute('Sport'), '-> sport:', sport, sportKey);
             // Workout date: Activity Id -> first Lap StartTime -> first Trackpoint Time.
             // Falling back to "now" makes several files uploaded together look like duplicates.
             const toDate = (value) => {
@@ -1501,6 +2212,7 @@
             return {
                 date,
                 sport,
+                sportKey,
                 duration: totalTime,
                 distance: totalDistance,
                 calories: totalCalories,
@@ -1526,37 +2238,13 @@
             return fitSdkPromise;
         }
 
-        // Russian names for FIT sport / sub-sport values (a known sub-sport wins)
-        const FIT_SUB_SPORT_NAMES = {
-            badminton: 'Бадминтон', tableTennis: 'Настольный теннис', squash: 'Сквош', padel: 'Падел',
-            pickleball: 'Пиклбол', racquetball: 'Ракетбол',
-            treadmill: 'Бег на дорожке', indoorRunning: 'Бег в помещении', trail: 'Трейлраннинг',
-            indoorCycling: 'Велотренажёр', spin: 'Сайкл', mountain: 'Маунтинбайк',
-            lapSwimming: 'Плавание в бассейне', openWater: 'Плавание на открытой воде',
-            strengthTraining: 'Силовая тренировка', cardioTraining: 'Кардиотренировка',
-            flexibilityTraining: 'Растяжка', yoga: 'Йога', pilates: 'Пилатес',
-            hiit: 'Интервальная тренировка (HIIT)', tabata: 'Интервальная тренировка (табата)',
-            amrap: 'Интервальная тренировка (AMRAP)', emom: 'Интервальная тренировка (EMOM)',
-            elliptical: 'Эллипс', indoorRowing: 'Гребной тренажёр', stairClimbing: 'Степпер',
-            indoorWalking: 'Ходьба в помещении', casualWalking: 'Прогулка', speedWalking: 'Спортивная ходьба'
-        };
-        const FIT_SPORT_NAMES = {
-            generic: 'Тренировка', running: 'Бег', cycling: 'Велосипед', walking: 'Ходьба',
-            hiking: 'Хайкинг', swimming: 'Плавание', training: 'Тренировка', fitnessEquipment: 'Тренажёр',
-            hiit: 'Интервальная тренировка (HIIT)', racket: 'Ракеточный спорт', tennis: 'Теннис',
-            basketball: 'Баскетбол', soccer: 'Футбол', volleyball: 'Волейбол', rowing: 'Гребля',
-            crossCountrySkiing: 'Беговые лыжи', alpineSkiing: 'Горные лыжи', snowboarding: 'Сноуборд',
-            inlineSkating: 'Ролики', iceSkating: 'Коньки', rockClimbing: 'Скалолазание', boxing: 'Бокс',
-            dance: 'Танцы', jumpRope: 'Скакалка', meditation: 'Медитация', mobility: 'Мобильность'
-        };
-
         async function parseFIT(arrayBuffer) {
             let sdk;
             try {
                 sdk = await loadFitSdk();
             } catch (error) {
                 console.error('Failed to load FIT SDK:', error);
-                const message = 'Не удалось загрузить модуль для FIT-файлов. Проверьте подключение к интернету';
+                const message = t('notify.fitModuleFailed');
                 // Several FIT files in one upload should not stack identical notifications
                 if (![...document.querySelectorAll('.notification')].some(n => n.textContent === message)) {
                     showNotification(message, 'info', 5000);
@@ -1616,14 +2304,15 @@
                 ? heartRates.reduce((a, b) => Math.min(a, b))
                 : null);
 
-            const sport = FIT_SUB_SPORT_NAMES[session.subSport]
-                || FIT_SPORT_NAMES[session.sport]
-                || session.sport
-                || 'Тренировка';
+            // A known sub-sport (badminton) is more specific than the sport (racket)
+            const sportKey = SPORTS[session.subSport] ? session.subSport
+                : SPORTS[session.sport] ? session.sport
+                : null;
+            const sport = session.sport || null;
 
             console.log('Successfully parsed FIT:', {
                 date: date.toISOString(),
-                sport: `${session.sport}/${session.subSport} -> ${sport}`,
+                sport: `${session.sport}/${session.subSport} -> ${sportKey}`,
                 duration,
                 calories
             });
@@ -1631,6 +2320,7 @@
             return {
                 date,
                 sport,
+                sportKey,
                 duration,
                 distance: sum('totalDistance'),
                 calories,
@@ -1681,7 +2371,7 @@
                 nameElement = track.querySelector('n');
             }
             
-            let sport = 'Тренировка';
+            let sport = null;
             if (nameElement) {
                 const fullName = nameElement.textContent;
                 console.log('GPX track full name:', fullName);
@@ -1696,7 +2386,8 @@
                 }
             }
             
-            console.log('GPX track name:', nameElement ? nameElement.textContent : 'not found', '-> sport:', sport);
+            const sportKey = sportKeyFromName(sport);
+            console.log('GPX track name:', nameElement ? nameElement.textContent : 'not found', '-> sport:', sport, sportKey);
 
             const trackPoints = xml.querySelectorAll('trkpt');
             if (trackPoints.length === 0) {
@@ -1793,7 +2484,8 @@
                 avgHeartRate,
                 maxHeartRate,
                 heartRates,
-                trackPoints: points
+                trackPoints: points,
+                sportKey
             };
         }
 
@@ -1807,9 +2499,9 @@
             );
 
             document.getElementById('totalWorkouts').textContent = totalWorkouts;
-            document.getElementById('totalCalories').textContent = Math.round(totalCalories).toLocaleString();
+            document.getElementById('totalCalories').textContent = formatNumber(totalCalories);
             document.getElementById('avgHeartRate').textContent = avgHeartRate || '--';
-            document.getElementById('totalTime').textContent = `${Math.round(totalTime / 3600)}ч`;
+            document.getElementById('totalTime').textContent = `${Math.round(totalTime / 3600)}${t('unit.h')}`;
 
             // Update workouts list
             updateWorkoutsList();
@@ -1833,79 +2525,42 @@
 
         function updateWorkoutsList() {
             const listContainer = document.getElementById('workoutsList');
-            listContainer.innerHTML = '<div class="chart-title">📋 История тренировок</div>';
+            listContainer.innerHTML = `<div class="chart-title">${t('history.title')}</div>`;
 
             workoutsData.forEach(workout => {
                 const item = document.createElement('div');
                 item.className = 'workout-item';
                 
-                const dateStr = workout.date.toLocaleDateString('ru-RU', {
+                const dateStr = formatDate(workout.date, {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric'
                 });
 
                 const duration = Math.round(workout.duration / 60);
-                const distance = (workout.distance / 1000).toFixed(2);
+                const distance = formatNumber(workout.distance / 1000, 2);
                 
-                // Map sport types to icons
-                const sportIcons = {
-                    'Running': '🏃',
-                    'Outdoor running': '🏃',
-                    'Indoor running': '🏃',
-                    'Treadmill': '🏃',
-                    'Biking': '🚴',
-                    'Cycling': '🚴',
-                    'Outdoor cycling': '🚴',
-                    'Indoor cycling': '🚴',
-                    'Walking': '🚶',
-                    'Hiking': '🥾',
-                    'Swimming': '🏊',
-                    'Pool swimming': '🏊',
-                    'Open water swimming': '🏊',
-                    'Other': '🏸',
-                    'Badminton': '🏸',
-                    'Tennis': '🎾',
-                    'Roller skating': '⛸️',
-                    'Skiing': '⛷️',
-                    'Cross-country skiing': '⛷️',
-                    'Yoga': '🧘',
-                    'Strength training': '💪',
-                    'Elliptical': '🏋️',
-                    'Rowing': '🚣',
-                    'Jump rope': '🪢',
-                    'Cricket': '🏏',
-                    'Basketball': '🏀',
-                    'Football': '⚽',
-                    'Soccer': '⚽'
-                };
-                
-                // Russian names from Zepp <Notes>, first match wins
-                const sportKeywordIcons = [
-                    ['бадминтон', '🏸'], ['теннис', '🎾'], ['интервал', '⚡'], ['силов', '💪'],
-                    ['бег', '🏃'], ['ходьб', '🚶'], ['вело', '🚴'], ['плаван', '🏊'],
-                    ['йога', '🧘'], ['лыж', '⛷️'], ['футбол', '⚽'], ['баскетбол', '🏀'],
-                    ['ракеточ', '🏸'], ['прогулк', '🚶']
-                ];
-                const sportLower = (workout.sport || '').toLowerCase();
-                const keywordIcon = sportKeywordIcons.find(([keyword]) => sportLower.includes(keyword))?.[1];
-                const sportIcon = sportIcons[workout.sport] || keywordIcon || '💪';
-                const sportName = (workout.sport || 'Тренировка')
+                const escapeHtml = (text) => text
                     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                const name = escapeHtml(sportName(workout));
+                const effect = workout.trainingEffect != null
+                    ? formatNumber(workout.trainingEffect, 1)
+                        + (workout.anaerobicTrainingEffect != null ? ` / ${formatNumber(workout.anaerobicTrainingEffect, 1)}` : '')
+                    : null;
 
                 item.innerHTML = `
                     <div class="workout-date">
-                        <span title="${sportName}">${sportIcon}</span> ${dateStr}
-                        <span style="color: var(--text-dim); font-weight: normal;">· ${sportName}</span>
+                        <span title="${name}">${sportIcon(workout)}</span> ${dateStr}
+                        <span style="color: var(--text-dim); font-weight: normal;">· ${name}</span>
                     </div>
                     <div class="workout-stats">
-                        <span class="stat-badge">⏱️ ${duration} мин</span>
-                        <span class="stat-badge">🔥 ${Math.round(workout.calories)} ккал</span>
-                        <span class="stat-badge">💓 ${workout.avgHeartRate} уд/мин</span>
-                        ${workout.minHeartRate ? `<span class="stat-badge" title="Минимальный пульс">📉 мин. ${workout.minHeartRate} уд/мин</span>` : ''}
-                        ${workout.trainingEffect != null ? `<span class="stat-badge" title="Тренировочный эффект по данным часов (0–5): аэробный / анаэробный">🎯 эффект ${workout.trainingEffect.toFixed(1)}${workout.anaerobicTrainingEffect != null ? ` / ${workout.anaerobicTrainingEffect.toFixed(1)}` : ''}</span>` : ''}
-                        ${workout.trainingLoad != null ? `<span class="stat-badge" title="Тренировочная нагрузка по данным часов">📊 нагрузка ${workout.trainingLoad}</span>` : ''}
-                        ${workout.distance > 0 ? `<span class="stat-badge">📍 ${distance} км</span>` : ''}
+                        <span class="stat-badge">⏱️ ${duration} ${t('unit.min')}</span>
+                        <span class="stat-badge">🔥 ${Math.round(workout.calories)} ${t('unit.kcal')}</span>
+                        <span class="stat-badge">💓 ${workout.avgHeartRate} ${t('unit.bpm')}</span>
+                        ${workout.minHeartRate ? `<span class="stat-badge" title="${t('badge.minHrTitle')}">📉 ${t('badge.min')} ${workout.minHeartRate} ${t('unit.bpm')}</span>` : ''}
+                        ${effect ? `<span class="stat-badge" title="${t('badge.effectTitle')}">🎯 ${t('badge.effect')} ${effect}</span>` : ''}
+                        ${workout.trainingLoad != null ? `<span class="stat-badge" title="${t('badge.loadTitle')}">📊 ${t('badge.load')} ${workout.trainingLoad}</span>` : ''}
+                        ${workout.distance > 0 ? `<span class="stat-badge">📍 ${distance} ${t('unit.km')}</span>` : ''}
                     </div>
                 `;
 
@@ -1920,7 +2575,7 @@
 
             // Workouts over time chart: one bar per workout (duration), oldest -> newest, last 30
             const chartWorkouts = [...workoutsData].sort((a, b) => a.date - b.date).slice(-30);
-            const labels = chartWorkouts.map(w => w.date.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' }));
+            const labels = chartWorkouts.map(w => formatDate(w.date, { month: 'short', day: 'numeric' }));
             const data = chartWorkouts.map(w => Math.round(w.duration / 60));
 
             const ctx1 = document.getElementById('workoutsChart').getContext('2d');
@@ -1929,7 +2584,7 @@
                 data: {
                     labels,
                     datasets: [{
-                        label: 'Длительность',
+                        label: t('chart.duration'),
                         data,
                         backgroundColor: 'rgba(0, 255, 136, 0.6)',
                         borderColor: 'rgba(0, 255, 136, 1)',
@@ -1948,21 +2603,21 @@
                             callbacks: {
                                 title: (items) => {
                                     const w = chartWorkouts[items[0].dataIndex];
-                                    const date = w.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-                                    return `${date} · ${w.sport || 'Тренировка'}`;
+                                    const date = formatDate(w.date, { day: 'numeric', month: 'long', year: 'numeric' });
+                                    return `${date} · ${sportName(w)}`;
                                 },
                                 label: (item) => {
                                     const w = chartWorkouts[item.dataIndex];
                                     const lines = [
-                                        `⏱️ ${item.raw} мин`,
-                                        `🔥 ${Math.round(w.calories)} ккал`,
-                                        `💓 ${w.avgHeartRate} уд/мин` + (w.minHeartRate ? ` (мин. ${w.minHeartRate}, макс. ${w.maxHeartRate})` : '')
+                                        `⏱️ ${item.raw} ${t('unit.min')}`,
+                                        `🔥 ${Math.round(w.calories)} ${t('unit.kcal')}`,
+                                        `💓 ${w.avgHeartRate} ${t('unit.bpm')}` + (w.minHeartRate ? ` ${t('chart.hrRange', { min: w.minHeartRate, max: w.maxHeartRate })}` : '')
                                     ];
                                     if (w.trainingEffect != null) {
-                                        lines.push(`🎯 эффект ${w.trainingEffect.toFixed(1)}` + (w.anaerobicTrainingEffect != null ? ` / ${w.anaerobicTrainingEffect.toFixed(1)}` : ''));
+                                        lines.push(`🎯 ${t('badge.effect')} ${formatNumber(w.trainingEffect, 1)}` + (w.anaerobicTrainingEffect != null ? ` / ${formatNumber(w.anaerobicTrainingEffect, 1)}` : ''));
                                     }
                                     if (w.trainingLoad != null) {
-                                        lines.push(`📊 нагрузка ${w.trainingLoad}`);
+                                        lines.push(`📊 ${t('badge.load')} ${w.trainingLoad}`);
                                     }
                                     return lines;
                                 }
@@ -1972,7 +2627,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: { display: true, text: 'мин', color: '#8b9dc3' },
+                            title: { display: true, text: t('unit.min'), color: '#8b9dc3' },
                             ticks: { color: '#8b9dc3' },
                             grid: { color: '#2a3550' }
                         },
@@ -1988,7 +2643,7 @@
             const heartRateData = workoutsData.map((w, i) => ({
                 x: i,
                 y: w.avgHeartRate,
-                label: w.date.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' })
+                label: formatDate(w.date, { month: 'short', day: 'numeric' })
             }));
 
             const ctx2 = document.getElementById('heartRateChart').getContext('2d');
@@ -1997,7 +2652,7 @@
                 data: {
                     labels: heartRateData.map(d => d.label),
                     datasets: [{
-                        label: 'Средний пульс',
+                        label: t('chart.avgHr'),
                         data: heartRateData.map(d => d.y),
                         borderColor: '#ff3366',
                         backgroundColor: 'rgba(255, 51, 102, 0.1)',
@@ -2082,20 +2737,20 @@
             if (workoutsPerWeek >= 3) {
                 insights.push({
                     icon: '✅',
-                    title: 'Отличная регулярность',
-                    text: `Вы тренируетесь ${workoutsPerWeek.toFixed(1)} раз в неделю. Это оптимальный режим для поддержания формы и развития выносливости.`
+                    title: t('ins.regular.title'),
+                    text: t('ins.regular.text', { n: formatNumber(workoutsPerWeek, 1) })
                 });
             } else if (workoutsPerWeek >= 2) {
                 insights.push({
                     icon: '⚠️',
-                    title: 'Увеличьте частоту',
-                    text: `Вы тренируетесь ${workoutsPerWeek.toFixed(1)} раз в неделю. Для лучших результатов рекомендуется 3-4 тренировки в неделю.`
+                    title: t('ins.moreOften.title'),
+                    text: t('ins.moreOften.text', { n: formatNumber(workoutsPerWeek, 1) })
                 });
             } else {
                 insights.push({
                     icon: '❗',
-                    title: 'Нужна регулярность',
-                    text: 'Старайтесь тренироваться минимум 2-3 раза в неделю для поддержания физической формы.'
+                    title: t('ins.irregular.title'),
+                    text: t('ins.irregular.text')
                 });
             }
 
@@ -2107,20 +2762,20 @@
                 if (avgHRPercent >= 70 && avgHRPercent <= 85) {
                     insights.push({
                         icon: '💚',
-                        title: 'Оптимальная интенсивность',
-                        text: `Средний пульс ${avgHeartRate} уд/мин (${avgHRPercent}% от максимума) находится в аэробной зоне, что отлично для выносливости и сжигания жира.`
+                        title: t('ins.hrOptimal.title'),
+                        text: t('ins.hrOptimal.text', { hr: avgHeartRate, pct: t('ins.hrPct', { pct: avgHRPercent }) })
                     });
                 } else if (avgHRPercent > 85) {
                     insights.push({
                         icon: '🔴',
-                        title: 'Высокая интенсивность',
-                        text: `Средний пульс ${avgHeartRate} уд/мин (${avgHRPercent}% от максимума) довольно высок. Убедитесь, что включаете восстановительные периоды между интенсивными тренировками.`
+                        title: t('ins.hrHigh.title'),
+                        text: t('ins.hrHigh.text', { hr: avgHeartRate, pct: t('ins.hrPct', { pct: avgHRPercent }) })
                     });
                 } else {
                     insights.push({
                         icon: '💙',
-                        title: 'Умеренная нагрузка',
-                        text: `Средний пульс ${avgHeartRate} уд/мин (${avgHRPercent}% от максимума). Можно увеличить интенсивность для лучшего эффекта тренировок.`
+                        title: t('ins.hrModerate.title'),
+                        text: t('ins.hrModerate.text', { hr: avgHeartRate, pct: t('ins.hrPct', { pct: avgHRPercent }) })
                     });
                 }
             } else {
@@ -2128,20 +2783,20 @@
                 if (avgHeartRate >= 140 && avgHeartRate <= 160) {
                     insights.push({
                         icon: '💚',
-                        title: 'Оптимальная интенсивность',
-                        text: `Средний пульс ${avgHeartRate} уд/мин находится в аэробной зоне, что отлично для выносливости и сжигания жира.`
+                        title: t('ins.hrOptimal.title'),
+                        text: t('ins.hrOptimal.text', { hr: avgHeartRate, pct: '' })
                     });
                 } else if (avgHeartRate > 160) {
                     insights.push({
                         icon: '🔴',
-                        title: 'Высокая интенсивность',
-                        text: `Средний пульс ${avgHeartRate} уд/мин довольно высок. Убедитесь, что включаете восстановительные периоды между интенсивными тренировками.`
+                        title: t('ins.hrHigh.title'),
+                        text: t('ins.hrHigh.text', { hr: avgHeartRate, pct: '' })
                     });
                 } else {
                     insights.push({
                         icon: '💙',
-                        title: 'Умеренная нагрузка',
-                        text: `Средний пульс ${avgHeartRate} уд/мин. Можно увеличить интенсивность для лучшего эффекта тренировок.`
+                        title: t('ins.hrModerate.title'),
+                        text: t('ins.hrModerate.text', { hr: avgHeartRate, pct: '' })
                     });
                 }
             }
@@ -2152,14 +2807,14 @@
                 if (caloriesPerKg >= 6) {
                     insights.push({
                         icon: '🔥',
-                        title: 'Высокий расход энергии',
-                        text: `В среднем вы сжигаете ${avgCaloriesPerWorkout} ккал за тренировку (${caloriesPerKg.toFixed(1)} ккал/кг). Отличный показатель! Не забывайте о правильном питании для восстановления.`
+                        title: t('ins.energyHigh.title'),
+                        text: t('ins.energyHigh.text', { kcal: avgCaloriesPerWorkout, perKg: t('ins.perKg', { v: formatNumber(caloriesPerKg, 1) }) })
                     });
                 } else {
                     insights.push({
                         icon: '💡',
-                        title: 'Потенциал для роста',
-                        text: `Средний расход ${avgCaloriesPerWorkout} ккал за тренировку (${caloriesPerKg.toFixed(1)} ккал/кг). Можно увеличить продолжительность или интенсивность игры.`
+                        title: t('ins.energyGrow.title'),
+                        text: t('ins.energyGrow.text', { kcal: avgCaloriesPerWorkout, perKg: t('ins.perKg', { v: formatNumber(caloriesPerKg, 1) }) })
                     });
                 }
             } else {
@@ -2167,14 +2822,14 @@
                 if (avgCaloriesPerWorkout >= 400) {
                     insights.push({
                         icon: '🔥',
-                        title: 'Высокий расход энергии',
-                        text: `В среднем вы сжигаете ${avgCaloriesPerWorkout} ккал за тренировку. Отличный показатель! Не забывайте о правильном питании для восстановления.`
+                        title: t('ins.energyHigh.title'),
+                        text: t('ins.energyHigh.text', { kcal: avgCaloriesPerWorkout, perKg: '' })
                     });
                 } else {
                     insights.push({
                         icon: '💡',
-                        title: 'Потенциал для роста',
-                        text: `Средний расход ${avgCaloriesPerWorkout} ккал за тренировку. Можно увеличить продолжительность или интенсивность игры.`
+                        title: t('ins.energyGrow.title'),
+                        text: t('ins.energyGrow.text', { kcal: avgCaloriesPerWorkout, perKg: '' })
                     });
                 }
             }
@@ -2184,8 +2839,8 @@
             if (avgDuration > 60) {
                 insights.push({
                     icon: '😴',
-                    title: 'Важность восстановления',
-                    text: `Средняя продолжительность тренировок ${Math.round(avgDuration)} минут. При такой нагрузке необходим полноценный сон (7-9 часов) и день отдыха между тренировками.`
+                    title: t('ins.recovery.title'),
+                    text: t('ins.recovery.text', { min: Math.round(avgDuration) })
                 });
             }
 
@@ -2193,24 +2848,26 @@
             if (userProfile.weight && userProfile.height) {
                 const bmi = calculateBMI(userProfile.weight, userProfile.height);
                 const category = getBMICategory(bmi);
+                const bmiText = formatNumber(bmi, 1);
+                const categoryName = t(`bmi.${category}`);
                 
-                if (category === 'Нормальный') {
+                if (category === 'normal') {
                     insights.push({
                         icon: '⚖️',
-                        title: 'Идеальный вес',
-                        text: `Ваш ИМТ ${bmi} в норме. Продолжайте поддерживать текущий режим тренировок и питания.`
+                        title: t('ins.bmiNormal.title'),
+                        text: t('ins.bmiNormal.text', { bmi: bmiText })
                     });
-                } else if (category === 'Избыточный' || category === 'Ожирение') {
+                } else if (category === 'over' || category === 'obese') {
                     insights.push({
                         icon: '🎯',
-                        title: 'Фокус на снижение веса',
-                        text: `Ваш ИМТ ${bmi} (${category}). Бадминтон - отличный выбор для снижения веса! Рекомендуется сочетать с правильным питанием и увеличить частоту тренировок до 4-5 раз в неделю.`
+                        title: t('ins.bmiLose.title'),
+                        text: t('ins.bmiLose.text', { bmi: bmiText, category: categoryName })
                     });
-                } else if (category === 'Недостаточный') {
+                } else if (category === 'under') {
                     insights.push({
                         icon: '🍽️',
-                        title: 'Набор массы',
-                        text: `Ваш ИМТ ${bmi} (${category}). Обратите внимание на калорийность питания и добавьте силовые тренировки для набора мышечной массы.`
+                        title: t('ins.bmiGain.title'),
+                        text: t('ins.bmiGain.text', { bmi: bmiText, category: categoryName })
                     });
                 }
             }
@@ -2220,8 +2877,8 @@
                 const waterNeeded = Math.round((avgDuration / 15) * 200);
                 insights.push({
                     icon: '💧',
-                    title: 'Не забывайте о воде',
-                    text: `При средней интенсивности ваших тренировок рекомендуется выпивать около ${waterNeeded} мл воды во время игры (каждые 15 минут по 200 мл).`
+                    title: t('ins.water.title'),
+                    text: t('ins.water.text', { ml: waterNeeded })
                 });
             }
 
@@ -2229,16 +2886,16 @@
             if (avgCaloriesPerWorkout > 400) {
                 insights.push({
                     icon: '🍽️',
-                    title: 'Питание для восстановления',
-                    text: `После интенсивной тренировки (${avgCaloriesPerWorkout} ккал) восполните энергию в течение 30-60 минут: углеводы + белок (например, банан + протеиновый коктейль). Это ускорит восстановление мышц.`
+                    title: t('ins.postMeal.title'),
+                    text: t('ins.postMeal.text', { kcal: avgCaloriesPerWorkout })
                 });
             }
 
             if (avgDuration > 45) {
                 insights.push({
                     icon: '🥗',
-                    title: 'Питание перед тренировкой',
-                    text: `За 1-2 часа до тренировки съешьте легкоусвояемые углеводы (овсянка, банан, тост с мёдом) для поддержания энергии на протяжении ${Math.round(avgDuration)} минут игры.`
+                    title: t('ins.preMeal.title'),
+                    text: t('ins.preMeal.text', { min: Math.round(avgDuration) })
                 });
             }
 
@@ -2257,12 +2914,12 @@
             console.log('Max HR:', maxHR, 'Age:', userProfile.age);
             
             const zones = [
-                { name: 'Отдых', min: 0, max: 0.5, color: 'zone-rest', benefit: 'Восстановление', time: 0 },
-                { name: 'Разминка', min: 0.5, max: 0.6, color: 'zone-warmup', benefit: 'Подготовка к нагрузке', time: 0 },
-                { name: 'Жиросжигание', min: 0.6, max: 0.7, color: 'zone-fat', benefit: 'Сжигание жира', time: 0 },
-                { name: 'Аэробная', min: 0.7, max: 0.8, color: 'zone-aerobic', benefit: 'Выносливость', time: 0 },
-                { name: 'Анаэробная', min: 0.8, max: 0.9, color: 'zone-anaerobic', benefit: 'Мощность', time: 0 },
-                { name: 'Максимум', min: 0.9, max: 1.0, color: 'zone-max', benefit: 'Пиковая нагрузка', time: 0 }
+                { name: t('zone.rest'), min: 0, max: 0.5, color: 'zone-rest', time: 0 },
+                { name: t('zone.warmup'), min: 0.5, max: 0.6, color: 'zone-warmup', time: 0 },
+                { name: t('zone.fat'), min: 0.6, max: 0.7, color: 'zone-fat', time: 0 },
+                { name: t('zone.aerobic'), min: 0.7, max: 0.8, color: 'zone-aerobic', time: 0 },
+                { name: t('zone.anaerobic'), min: 0.8, max: 0.9, color: 'zone-anaerobic', time: 0 },
+                { name: t('zone.max'), min: 0.9, max: 1.0, color: 'zone-max', time: 0 }
             ];
 
             // Calculate time in each zone
@@ -2311,8 +2968,8 @@
                     <div class="zone-color ${zone.color}"></div>
                     <div class="zone-info">
                         <div class="zone-name">${zone.name}</div>
-                        <div class="zone-range">${Math.round(zone.min * maxHR)}-${Math.round(zone.max * maxHR)} уд/мин</div>
-                        <div class="zone-time">${percentage.toFixed(1)}% времени</div>
+                        <div class="zone-range">${Math.round(zone.min * maxHR)}-${Math.round(zone.max * maxHR)} ${t('unit.bpm')}</div>
+                        <div class="zone-time">${t('zone.timeShare', { pct: formatNumber(percentage, 1) })}</div>
                     </div>
                 `;
                 zoneLegend.appendChild(item);
@@ -2380,7 +3037,7 @@
 
             console.log('Week stats:', weekStats);
             const progressGrid = document.getElementById('progressGrid');
-            progressGrid.innerHTML = '<div class="chart-title" style="grid-column: 1/-1;">📈 Прогресс по неделям</div>';
+            progressGrid.innerHTML = `<div class="chart-title" style="grid-column: 1/-1;">${t('progress.title')}</div>`;
 
             // This week vs last week
             const thisWeek = weekStats[0];
@@ -2388,32 +3045,32 @@
 
             const metrics = [
                 {
-                    title: 'Тренировки',
+                    title: t('progress.workouts'),
                     current: thisWeek.count,
                     previous: lastWeek.count,
-                    unit: 'раз',
+                    unit: t('unit.times', { n: thisWeek.count }),
                     format: (v) => Math.round(v)
                 },
                 {
-                    title: 'Калории',
+                    title: t('progress.calories'),
                     current: thisWeek.totalCalories,
                     previous: lastWeek.totalCalories,
-                    unit: 'ккал',
+                    unit: t('unit.kcal'),
                     format: (v) => Math.round(v)
                 },
                 {
-                    title: 'Средний пульс',
+                    title: t('progress.avgHr'),
                     current: thisWeek.avgHeartRate,
                     previous: lastWeek.avgHeartRate,
-                    unit: 'уд/мин',
+                    unit: t('unit.bpm'),
                     format: (v) => Math.round(v)
                 },
                 {
-                    title: 'Время',
+                    title: t('progress.time'),
                     current: thisWeek.totalTime,
                     previous: lastWeek.totalTime,
-                    unit: 'ч',
-                    format: (v) => v.toFixed(1)
+                    unit: t('unit.h'),
+                    format: (v) => formatNumber(v, 1)
                 }
             ];
 
@@ -2425,9 +3082,9 @@
                 const card = document.createElement('div');
                 card.className = 'progress-card';
                 card.innerHTML = `
-                    <div class="progress-title">${metric.title} (эта неделя)</div>
+                    <div class="progress-title">${t('progress.thisWeek', { title: metric.title })}</div>
                     <div class="progress-value">${metric.format(metric.current)}<span style="font-size: 1.5rem; color: var(--text-dim);"> ${metric.unit}</span></div>
-                    <div class="progress-trend ${trend}">${trendIcon} ${change > 0 ? '+' : ''}${change.toFixed(0)}% от прошлой</div>
+                    <div class="progress-trend ${trend}">${trendIcon} ${t('progress.vsLast', { change: `${change > 0 ? '+' : ''}${change.toFixed(0)}` })}</div>
                 `;
                 progressGrid.appendChild(card);
             });
@@ -2458,16 +3115,16 @@
 
             const benchmarks = [
                 {
-                    label: 'Калории за тренировку',
+                    label: t('bench.calories'),
                     current: Math.round(recentAvgCalories),
                     best: Math.round(maxCalories),
-                    unit: 'ккал'
+                    unit: t('unit.kcal')
                 },
                 {
-                    label: 'Продолжительность',
+                    label: t('bench.duration'),
                     current: Math.round(recentAvgDuration / 60),
                     best: Math.round(maxDuration / 60),
-                    unit: 'мин'
+                    unit: t('unit.min')
                 }
             ];
 
@@ -2476,10 +3133,10 @@
                 const avgCaloriesForAge = userProfile.age < 30 ? 500 : userProfile.age < 50 ? 450 : 400;
 
                 benchmarks.push({
-                    label: 'Калории vs средние для возраста',
+                    label: t('bench.ageCalories'),
                     current: Math.round(recentAvgCalories),
                     best: avgCaloriesForAge,
-                    unit: 'ккал',
+                    unit: t('unit.kcal'),
                     isComparison: true
                 });
             }
@@ -2490,8 +3147,8 @@
                 card.className = 'benchmark-card';
                 
                 const comparison = benchmark.isComparison 
-                    ? `Средний показатель для вашего возраста: ${benchmark.best} ${benchmark.unit}`
-                    : `Ваш лучший результат: ${benchmark.best} ${benchmark.unit}`;
+                    ? t('bench.ageAvg', { value: `${benchmark.best} ${benchmark.unit}` })
+                    : t('bench.best', { value: `${benchmark.best} ${benchmark.unit}` });
 
                 card.innerHTML = `
                     <div class="benchmark-header">
@@ -2518,7 +3175,7 @@
                     forecastCard.style.borderColor = 'var(--accent-primary)';
                     forecastCard.innerHTML = `
                         <div class="benchmark-header">
-                            <div class="benchmark-label">🔮 Прогноз через месяц</div>
+                            <div class="benchmark-label">${t('bench.forecast')}</div>
                         </div>
                         <div style="color: var(--text-secondary); line-height: 1.6; margin-top: 0.5rem;">
                             ${forecast}
@@ -2551,19 +3208,19 @@
 
             if (caloriesTrend > 10) {
                 const projectedCalories = Math.round(recentAvgCalories * 1.15);
-                forecast += `При текущем темпе роста интенсивности, через месяц вы будете сжигать около <strong style="color: var(--accent-primary);">${projectedCalories} ккал</strong> за тренировку. `;
+                forecast += t('forecast.growth', { value: `<strong style="color: var(--accent-primary);">${projectedCalories} ${t('unit.kcal')}</strong>` });
             } else if (caloriesTrend < -10) {
-                forecast += `Интенсивность тренировок снижается. Рекомендуется увеличить продолжительность или темп игры. `;
+                forecast += t('forecast.decline');
             } else {
-                forecast += `Вы поддерживаете стабильную интенсивность тренировок. `;
+                forecast += t('forecast.stable');
             }
 
             if (recentFrequency > olderFrequency) {
-                forecast += `Частота тренировок растёт — отличная тенденция! `;
+                forecast += t('forecast.moreOften');
             }
 
             const monthlyCalories = Math.round(recentAvgCalories * recentFrequency * 4);
-            forecast += `Ожидаемый расход за месяц: <strong style="color: var(--accent-primary);">${monthlyCalories.toLocaleString()} ккал</strong>.`;
+            forecast += t('forecast.monthly', { value: `<strong style="color: var(--accent-primary);">${formatNumber(monthlyCalories)} ${t('unit.kcal')}</strong>` });
 
             return forecast;
         }

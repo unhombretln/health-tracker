@@ -1030,6 +1030,11 @@
             align-items: start;
         }
 
+        /* Before any upload the side column is empty: let the history span the full width */
+        body:not(.has-data) .bento {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
         .bento-main, .bento-side {
             display: flex;
             flex-direction: column;

@@ -1024,22 +1024,66 @@
         }
 
         .bento {
-            display: grid;
-            grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
-            gap: 1.5rem;
-            align-items: start;
-        }
-
-        /* Before any upload the side column is empty: let the history span the full width */
-        body:not(.has-data) .bento {
-            grid-template-columns: minmax(0, 1fr);
-        }
-
-        .bento-main, .bento-side {
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
+        }
+
+        /* Two blocks per row with equal height, so their edges line up */
+        .bento-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+            gap: 1.5rem;
+        }
+
+        /* A hidden block (style="display: none" until there is data for it) gives its row partner the full width */
+        .bento-row:has(> [style*="display: none"]) {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .bento-row:not(:has(> :not([style*="display: none"]))) {
+            display: none;
+        }
+
+        /* Cards stretched to the row height: the chart takes the extra space */
+        .bento-row > .chart-container, .bento-row > .panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bento-row .chart-box, .bento-row .last-chart {
+            flex: 1 1 auto;
+        }
+
+        .chart-box canvas, .last-chart canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .bento #benchmarksContent {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+
+        .bento #benchmarksContent .benchmark-card {
+            margin: 0;
+        }
+
+        /* The value stays in one piece and moves under the label when the card is too narrow */
+        .bento .benchmark-header {
+            flex-wrap: wrap;
+            gap: 0.25rem 0.75rem;
+        }
+
+        .bento .benchmark-label {
             min-width: 0;
+        }
+
+        .bento .benchmark-label + div {
+            white-space: nowrap;
+            margin-left: auto;
         }
 
         .bento .chart-container, .bento .hr-zones, .bento .health-insights, .bento .workouts-list, .bento .progress-grid {
@@ -1056,11 +1100,11 @@
 
         .chart-box {
             position: relative;
-            height: 280px;
+            min-height: 280px;
         }
 
         #heartRateContainer .chart-box {
-            height: 240px;
+            min-height: 240px;
         }
 
         .panel {
@@ -1126,7 +1170,7 @@
 
         .last-chart {
             position: relative;
-            height: 220px;
+            min-height: 220px;
         }
 
         .last-zones {
@@ -1216,7 +1260,17 @@
 
         .bento .progress-grid {
             grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr 1fr;
             gap: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.75rem;
+        }
+
+        .bento .progress-grid .progress-card {
+            background: var(--bg-secondary);
+            border-radius: 14px;
         }
 
         .bento .progress-grid .chart-title {
@@ -1262,11 +1316,7 @@
         }
 
         @media (max-width: 1100px) {
-            .bento {
-                display: flex;
-                flex-direction: column;
-            }
-            .bento-main, .bento-side {
+            .bento-row {
                 display: contents;
             }
             #lastWorkout {
@@ -1541,7 +1591,8 @@
         </div>
 
         <div class="bento">
-            <div class="bento-main">
+            <!-- Paired blocks share a row so their edges line up -->
+            <div class="bento-row">
                 <section class="panel last-workout" id="lastWorkout" style="display: none;">
                     <div class="last-head">
                         <div>
@@ -1555,40 +1606,40 @@
                     <div class="chart-legend" id="lastZoneLegend"></div>
                 </section>
 
+                <div class="hr-zones" id="hrZones" style="display: none;">
+                    <div class="chart-title" data-i18n="zones.title">❤️ Зоны пульса</div>
+                    <div class="zone-bar" id="zoneBar"></div>
+                    <div class="zone-legend" id="zoneLegend"></div>
+                </div>
+            </div>
+
+            <div class="bento-row">
                 <div class="chart-container" id="chartsContainer" style="display: none;">
                     <div class="chart-title" data-i18n="chart.dynamics.title">📈 Динамика тренировок</div>
                     <div class="chart-legend" id="dynamicsLegend"></div>
                     <div class="chart-box"><canvas id="workoutsChart"></canvas></div>
                 </div>
 
-                <div class="chart-container" id="heartRateContainer" style="display: none;">
-                    <div class="chart-title" data-i18n="chart.hr.title">💗 Анализ пульса</div>
-                    <div class="chart-box"><canvas id="heartRateChart"></canvas></div>
-                </div>
+                <div class="progress-grid" id="progressGrid" style="display: none;"></div>
+            </div>
 
-                <div class="workouts-list" id="workoutsList">
-                    <div class="chart-title" data-i18n="history.title">📋 История тренировок</div>
-                    <div class="empty-state">
-                        <div class="empty-icon">📁</div>
-                        <div data-i18n="history.empty">Загрузите файлы тренировок для начала анализа</div>
-                    </div>
+            <div class="chart-container" id="heartRateContainer" style="display: none;">
+                <div class="chart-title" data-i18n="chart.hr.title">💗 Анализ пульса</div>
+                <div class="chart-box"><canvas id="heartRateChart"></canvas></div>
+            </div>
+
+            <div id="benchmarksSection" style="display: none;">
+                <div class="chart-container">
+                    <div class="chart-title" data-i18n="benchmarks.title">📊 Сравнение с лучшими показателями</div>
+                    <div id="benchmarksContent"></div>
                 </div>
             </div>
 
-            <div class="bento-side">
-                <div class="hr-zones" id="hrZones" style="display: none;">
-                    <div class="chart-title" data-i18n="zones.title">❤️ Зоны пульса</div>
-                    <div class="zone-bar" id="zoneBar"></div>
-                    <div class="zone-legend" id="zoneLegend"></div>
-                </div>
-
-                <div class="progress-grid" id="progressGrid" style="display: none;"></div>
-
-                <div id="benchmarksSection" style="display: none;">
-                    <div class="chart-container">
-                        <div class="chart-title" data-i18n="benchmarks.title">📊 Сравнение с лучшими показателями</div>
-                        <div id="benchmarksContent"></div>
-                    </div>
+            <div class="workouts-list" id="workoutsList">
+                <div class="chart-title" data-i18n="history.title">📋 История тренировок</div>
+                <div class="empty-state">
+                    <div class="empty-icon">📁</div>
+                    <div data-i18n="history.empty">Загрузите файлы тренировок для начала анализа</div>
                 </div>
             </div>
 
@@ -3138,8 +3189,8 @@
             document.body.classList.add('has-data');
 
             // Show containers
-            document.getElementById('chartsContainer').style.display = 'block';
-            document.getElementById('heartRateContainer').style.display = 'block';
+            document.getElementById('chartsContainer').style.display = '';
+            document.getElementById('heartRateContainer').style.display = '';
             
             // Show clear button
             const clearBtn = document.getElementById('clearBtn');
@@ -3432,7 +3483,7 @@
                 panel.style.display = 'none';
                 return;
             }
-            panel.style.display = 'block';
+            panel.style.display = '';
 
             const date = formatDate(workout.date, { weekday: 'long', day: 'numeric', month: 'long' });
             const time = workout.date.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
@@ -3946,7 +3997,7 @@
                 progressGrid.appendChild(card);
             });
 
-            progressGrid.style.display = 'grid';
+            progressGrid.style.display = '';
         }
 
         // Benchmarks and Comparisons
@@ -4042,7 +4093,7 @@
                 }
             }
 
-            document.getElementById('benchmarksSection').style.display = 'block';
+            document.getElementById('benchmarksSection').style.display = '';
             console.log('Benchmarks section displayed');
         }
 

@@ -384,6 +384,10 @@ canvas {
     border-color: var(--accent-secondary);
 }
 
+.notification.error {
+    border-color: var(--accent-danger);
+}
+
 @keyframes slideInRight {
     from {
         opacity: 0;

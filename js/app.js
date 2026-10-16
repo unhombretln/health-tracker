@@ -179,7 +179,7 @@ modalConfirm.addEventListener('click', () => {
         console.log('Data cleared successfully');
     } catch (error) {
         console.error('Error during clear:', error);
-        alert(t('alert.clearError', { error: error.message }));
+        showNotification(t('alert.clearError', { error: error.message }), 'error', 6000);
     }
 });
 
@@ -370,7 +370,7 @@ async function handleFiles(files) {
             console.log(`File ${i + 1}: ${file.name}, Type: ${file.type}, Size: ${file.size}`);
         }
 
-        alert(t('alert.loadFailed'));
+        showNotification(t('alert.loadFailed'), 'error', 6000);
     }
 }
 

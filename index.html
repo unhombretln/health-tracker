@@ -1071,12 +1071,19 @@
             margin: 0;
         }
 
+        /* The value stays in one piece and moves under the label when the card is too narrow */
         .bento .benchmark-header {
-            gap: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.25rem 0.75rem;
         }
 
-        .bento .benchmark-header > div:last-child {
+        .bento .benchmark-label {
+            min-width: 0;
+        }
+
+        .bento .benchmark-label + div {
             white-space: nowrap;
+            margin-left: auto;
         }
 
         .bento .chart-container, .bento .hr-zones, .bento .health-insights, .bento .workouts-list, .bento .progress-grid {

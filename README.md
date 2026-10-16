@@ -86,8 +86,8 @@ Simply open the app in your browser - no installation required!
 **Live Demo**: [health-tracker](https://health-tracker-pied-phi.vercel.app)
 
 ### Local Usage
-1. Download `index.html`
-2. Open the file in your browser
+1. Download the project (**Code → Download ZIP**) and unpack it
+2. Open `index.html` in your browser (the `css` and `js` folders must stay next to it)
 3. Done! Works offline
 
 ### Loading Data
@@ -257,8 +257,8 @@ If you have questions or issues:
 **Демо**: [health-tracker](https://health-tracker-pied-phi.vercel.app)
 
 ### Локальное использование
-1. Скачайте `index.html`
-2. Откройте файл в браузере
+1. Скачайте проект (**Code → Download ZIP**) и распакуйте
+2. Откройте `index.html` в браузере (папки `css` и `js` должны лежать рядом)
 3. Готово! Работает офлайн
 
 ### Загрузка данных

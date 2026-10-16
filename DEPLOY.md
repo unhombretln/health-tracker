@@ -15,7 +15,8 @@
 ### Шаг 2: Загрузка файлов
 1. На странице репозитория нажмите **Add file** → **Upload files**
 2. Перетащите эти файлы:
-   - `index.html` (главный файл приложения)
+   - `index.html` (главная страница приложения)
+   - папки `css` и `js` (стили и код приложения)
    - `README.md` (описание проекта)
 3. В поле "Commit message" напишите: `Initial commit`
 4. Нажмите **Commit changes**
@@ -40,7 +41,7 @@ https://ваш-username.github.io/health-tracker
 ### Netlify (ещё проще!)
 1. Зайдите на https://netlify.com
 2. Нажмите **Add new site** → **Deploy manually**
-3. Перетащите файл `index.html` в окно браузера
+3. Перетащите в окно браузера папку проекта (с `index.html`, `css` и `js`)
 4. Готово! Сайт опубликован за 30 секунд
 
 ### Vercel
@@ -74,7 +75,7 @@ https://ваш-username.github.io/health-tracker
 Когда захотите обновить приложение:
 
 ### Через веб-интерфейс GitHub:
-1. Откройте файл `index.html` в репозитории
+1. Откройте нужный файл в репозитории: `index.html` (разметка), `css/styles.css` (оформление) или файл в папке `js` (код)
 2. Нажмите иконку карандаша (Edit)
 3. Вставьте новый код
 4. **Commit changes**
@@ -83,7 +84,7 @@ https://ваш-username.github.io/health-tracker
 ```bash
 git clone https://github.com/your-username/health-tracker.git
 cd health-tracker
-# Внесите изменения в index.html
+# Внесите изменения в index.html, css/ или js/
 git add .
 git commit -m "Update app"
 git push

@@ -35,6 +35,10 @@ A web application for detailed sports workout analysis with personalized health 
 - Maximum heart rate calculation
 - Local data storage
 
+### 🎨 Themes
+- Dark and light theme (☀️ / 🌙 switch next to the language switch)
+- The OS setting decides on the first visit, the choice is remembered afterwards
+
 ### 🌐 Languages
 - Russian, English and Estonian interface (RU / EN / ET switch in the top-right corner)
 - Language is picked from the browser settings on the first visit and remembered afterwards
@@ -201,6 +205,10 @@ If you have questions or issues:
 - Автоматический расчёт ИМТ
 - Расчёт максимального пульса
 - Сохранение данных локально
+
+### 🎨 Темы
+- Тёмная и светлая тема (переключатель ☀️ / 🌙 рядом с выбором языка)
+- При первом заходе тема берётся из настроек системы, дальше запоминается выбранная
 
 ### 🌐 Языки
 - Интерфейс на русском, английском и эстонском (переключатель RU / EN / ET в правом верхнем углу)
